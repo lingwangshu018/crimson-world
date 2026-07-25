@@ -21,7 +21,7 @@ const OWNER_KEY = "crimson-tavern.vault-owner-key.v1";
 const READ_KEY = "crimson-tavern.vault-read-key.v1";
 const REPLY_KEY = "crimson-tavern.vault-note-key.v1";
 const RECORDS_API_URL =
-  "https://crimson-tavern.boarder-72pound.chatgpt.site/api/records";
+  "https://crimson-world.lingwangshu018.workers.dev/api/records";
 
 function createVaultKey() {
   const bytes = new Uint8Array(32);
