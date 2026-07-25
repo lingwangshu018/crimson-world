@@ -26,6 +26,7 @@ const patches = [
   { file: "apply-unified-module-cloud-status.mjs", label: "unified module cloud status and key migration" },
   { file: "apply-time-wheel-history-layout-fix.mjs", label: "time wheel mobile history layout" },
   { file: "apply-time-wheel-confirm-only.mjs", label: "time wheel simple confirmation" },
+  { file: "apply-unified-ai-task-instructions.mjs", label: "unified AI task instructions" },
   { file: "apply-study-room.mjs", label: "study rooms" },
 ];
 
