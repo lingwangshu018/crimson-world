@@ -1,0 +1,19 @@
+{
+  "name": "绯界",
+  "short_name": "绯界",
+  "description": "绯界：酒馆、日记、时光之轮与更多私人空间共同组成的幻想世界。",
+  "lang": "zh-CN",
+  "start_url": "/crimson-world/",
+  "scope": "/crimson-world/",
+  "display": "standalone",
+  "background_color": "#050203",
+  "theme_color": "#100709",
+  "icons": [
+    {
+      "src": "/crimson-world/favicon.svg?v=2",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
