@@ -61,8 +61,9 @@ export function TimeWheelRoom({ onClose }: TimeWheelRoomProps) {
       doc.addEventListener(
         "click",
         (event) => {
-          const target = event.target;
-          if (!(target instanceof frameWindow.Element)) return;
+          const target = event.target as Element | null;
+          if (!target || typeof target.closest !== "function") return;
+
           const button = target.closest("button.tm-send");
           if (!button) return;
 
