@@ -111,9 +111,9 @@ source = source.replace(
         : "请严格依据本次主题、补充要求、模块提示词，并结合当前聊天已加载的角色卡、世界书、核心记忆与近期记忆，填充 HTML 模板。",
       "",
       "【代码输出约束】",
-      "• 核心警告：严禁使用任何 Markdown 代码围栏包裹，尤其不要添加 html 代码块标记；必须直接输出纯 HTML 字符串。",
-      "• 严格使用记录中提供的 HTML/CSS 架构，严禁修改样式。",
-      "• 必须将全部代码压缩为单行输出，中间禁止任何换行。",
+      "• 不得使用任何 Markdown 代码围栏，必须直接输出纯 HTML 字符串。",
+      "• 严格使用记录中提供的 HTML/CSS 架构，不得修改样式。",
+      "• 必须将全部代码压缩为单行输出，中间不得换行。",
       "• 将模板占位符依次替换，填充内容字数充足。",
       "• 填充内容必须严格依据角色设定、世界书、核心记忆与近期记忆。",
       "",
@@ -122,10 +122,24 @@ source = source.replace(
       "只处理这一条记录即可。",`,
 );
 
+const pullAnchor = `      writeHistory(next);
+      setStatus(count ? "已收取 " + count + " 条新回复。" : "暂时没有新的 AI 回复。");
+      refreshHistoryTools();`;
+
+if (source.includes(pullAnchor)) {
+  source = source.replace(
+    pullAnchor,
+    `      writeHistory(next);
+      setStatus(count ? "已收取 " + count + " 条新回复，并写回对应记录。" : "暂时没有新的 AI 回复。");
+      refreshHistoryTools();
+      if (count) setTimeout(() => location.reload(), 400);`,
+  );
+}
+
 source = source.replace(
   "  // CRIMSON_TIME_WHEEL_DIRECT_REPLY_COLLECTION",
   `  // CRIMSON_TIME_WHEEL_DIRECT_REPLY_COLLECTION\n  // ${marker}`,
 );
 
 fs.writeFileSync(path, source);
-console.log("Applied Time Wheel HTML template reading, single-line HTML output, and reply preview.");
+console.log("Applied Time Wheel HTML template reading, reply persistence, and HTML preview.");
