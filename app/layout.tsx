@@ -6,8 +6,8 @@ import { TavernLife } from "./TavernLife";
 import { CloudCellar } from "./CloudCellar";
 
 export const metadata: Metadata = {
-  title: "绯夜酒馆",
-  description: "一间仅为成年虚构人物开门的标签特调酒馆。",
+  title: "绯界",
+  description: "绯界：承载酒馆、日记、时光之轮与更多私人故事空间。",
   other: {
     "codex-preview": "development",
   },
