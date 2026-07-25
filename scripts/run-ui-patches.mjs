@@ -27,6 +27,7 @@ const patches = [
   { file: "apply-time-wheel-history-layout-fix.mjs", label: "time wheel mobile history layout" },
   { file: "apply-time-wheel-confirm-only.mjs", label: "time wheel simple confirmation" },
   { file: "apply-unified-ai-task-instructions.mjs", label: "unified AI task instructions" },
+  { file: "apply-time-wheel-local-ai-send.mjs", label: "time wheel local AI sending" },
   { file: "apply-study-room.mjs", label: "study rooms" },
 ];
 
