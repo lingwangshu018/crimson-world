@@ -34,6 +34,7 @@ const patches = [
   { file: "apply-tavern-numbered-ai-send.mjs", label: "numbered tavern direct AI sending" },
   { file: "apply-tavern-unified-record-sync.mjs", label: "tavern unified record sync" },
   { file: "apply-direct-reply-collection.mjs", label: "direct tavern and time wheel reply collection" },
+  { file: "apply-time-wheel-html-ai-workflow.mjs", label: "time wheel HTML template AI workflow" },
   { file: "apply-study-room.mjs", label: "study rooms" },
 ];
 
