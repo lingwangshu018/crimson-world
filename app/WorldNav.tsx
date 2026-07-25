@@ -11,7 +11,7 @@ import "./gpt-mobile-nav.css";
 const sidebarNames: Record<RoomId, string> = {
   tavern: "酒馆",
   cafe: "咖啡馆",
-  journal: "图书馆",
+  journal: "日记本",
   wheel: "时光之轮",
   study: "自习室",
 };
@@ -20,6 +20,7 @@ export function WorldNav() {
   const [open, setOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
   const [active, setActive] = useState<RoomId>("tavern");
+  const [previousActive, setPreviousActive] = useState<RoomId | null>(null);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -68,6 +69,7 @@ export function WorldNav() {
   }, []);
 
   function selectSpace(space: RoomDefinition) {
+    if (space.id !== active) setPreviousActive(active);
     setActive(space.id);
     setOpen(false);
     setMapOpen(false);
@@ -77,7 +79,16 @@ export function WorldNav() {
   }
 
   const tavern = roomRegistry[0];
-  const returnToTavern = () => selectSpace(tavern);
+  const returnToPrevious = () => {
+    const target = roomRegistry.find((space) => space.id === previousActive) || tavern;
+    setActive(target.id);
+    setPreviousActive(null);
+    setOpen(false);
+    setMapOpen(false);
+    if (target.id === "tavern") {
+      window.setTimeout(() => document.querySelector("#bar")?.scrollIntoView({ behavior: "smooth" }), 0);
+    }
+  };
   const openMap = () => {
     setOpen(false);
     setMapOpen(true);
@@ -147,7 +158,7 @@ export function WorldNav() {
       </aside>
 
       <WorldMap open={mapOpen} active={active} onClose={() => setMapOpen(false)} onSelect={selectSpace} />
-      <WorldRoomOutlet active={active} onClose={returnToTavern} />
+      <WorldRoomOutlet active={active} onClose={returnToPrevious} />
     </>
   );
 }
