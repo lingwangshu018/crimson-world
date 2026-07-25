@@ -160,7 +160,7 @@ export function OpeningScene() {
       <div className="opening-glow" aria-hidden="true" />
       <div className="opening-doors" aria-hidden="true"><i /><i /></div>
       <div className="opening-content">
-        <img className="opening-emblem" src="favicon.svg?v=4" alt="绯界兔子徽章" />
+        <img className="opening-emblem" src="/favicon.svg?v=5" alt="绯界兔子徽章" />
         <p>CRIMSON WORLD</p>
         <h1>绯界</h1>
         <span>{guestName ? `欢迎，${guestName}。绯界已经为你点亮。` : "门扉轻启，绯界正在为你展开。"}</span>
