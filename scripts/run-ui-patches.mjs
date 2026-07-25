@@ -22,6 +22,7 @@ const patches = [
   { file: "apply-local-backup-tools.mjs", label: "journal and time wheel backups" },
   { file: "apply-unified-vault-keys.mjs", label: "shared vault API and keys" },
   { file: "apply-cloudflare-owned-vault.mjs", label: "configurable cloud routing" },
+  { file: "apply-cloud-key-center.mjs", label: "three-key cloud identity center" },
   { file: "apply-study-room.mjs", label: "study rooms" },
 ];
 
