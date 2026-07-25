@@ -29,6 +29,7 @@ const patches = [
   { file: "apply-unified-ai-task-instructions.mjs", label: "unified AI task instructions" },
   { file: "apply-time-wheel-local-ai-send.mjs", label: "time wheel local AI sending" },
   { file: "apply-journal-local-ai-send.mjs", label: "journal local AI sending" },
+  { file: "apply-tavern-ai-workflow.mjs", label: "tavern AI sending and note collection" },
   { file: "apply-study-room.mjs", label: "study rooms" },
 ];
 
