@@ -4,15 +4,13 @@ const wheelPath = new URL("../public/time-wheel/index.html", import.meta.url);
 let wheel = fs.readFileSync(wheelPath, "utf8");
 
 const marker = "CRIMSON_TIME_WHEEL_LOCAL_AI_SEND";
+const pattern = /  async function sendRecordToAI\(id\) \{[\s\S]*?\n  \}\n\n  async function pullReplies\(\) \{/;
 
-if (!wheel.includes(marker)) {
-  const pattern = /  async function sendRecordToAI\(id\) \{[\s\S]*?\n  \}\n\n  async function pullReplies\(\) \{/;
+if (!pattern.test(wheel)) {
+  throw new Error("Time Wheel sendRecordToAI block not found");
+}
 
-  if (!pattern.test(wheel)) {
-    throw new Error("Time Wheel sendRecordToAI block not found");
-  }
-
-  const replacement = `  async function sendRecordToAI(id) {
+const replacement = `  async function sendRecordToAI(id) {
     const history = readHistory();
     const index = history.findIndex(item => String(item.id) === String(id));
     const item = history[index];
@@ -64,8 +62,12 @@ if (!wheel.includes(marker)) {
 
   async function pullReplies() {`;
 
-  wheel = wheel.replace(pattern, replacement);
-}
+wheel = wheel.replace(pattern, replacement);
+
+// Remove duplicate markers left by previous builds. Keeping one marker is useful for inspection,
+// but it must never be used to skip enforcement because earlier patches can recreate the old function.
+const markerPattern = new RegExp(`(?:\\n\\s*// ${marker})+`, "g");
+wheel = wheel.replace(markerPattern, `\n\n  // ${marker}`);
 
 fs.writeFileSync(wheelPath, wheel);
-console.log("Decoupled Time Wheel AI sending from cloud synchronization.");
+console.log("Enforced Time Wheel AI sending without cloud synchronization.");
