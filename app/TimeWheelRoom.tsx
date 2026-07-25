@@ -223,7 +223,7 @@ export function TimeWheelRoom({ onClose }: TimeWheelRoomProps) {
                 "【回复钥匙】",
                 replyKey,
                 "",
-                "请先调用绯界插件的 read_crimson_record，精确读取这条记录的完整内容。",
+                "请先调用绯界 MCP 工具 read_crimson_record，精确读取这条记录的完整内容。",
                 "",
                 "结合当前聊天已经加载的：",
                 "- 角色卡",
