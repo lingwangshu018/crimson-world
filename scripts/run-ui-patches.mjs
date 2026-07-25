@@ -23,6 +23,7 @@ const patches = [
   { file: "apply-unified-vault-keys.mjs", label: "shared vault API and keys" },
   { file: "apply-cloudflare-owned-vault.mjs", label: "configurable cloud routing" },
   { file: "apply-cloud-key-center.mjs", label: "three-key cloud identity center" },
+  { file: "apply-unified-module-cloud-status.mjs", label: "unified module cloud status and key migration" },
   { file: "apply-study-room.mjs", label: "study rooms" },
 ];
 
