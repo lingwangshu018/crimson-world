@@ -1,24 +1,37 @@
 import { setD1 } from "./db";
 import {
-  GET,
-  OPTIONS,
-  PATCH,
-  POST,
-  PUT,
+  GET as vaultGET,
+  OPTIONS as vaultOPTIONS,
+  PATCH as vaultPATCH,
+  POST as vaultPOST,
+  PUT as vaultPUT,
 } from "./app/api/vault/route";
+import {
+  GET as recordsGET,
+  OPTIONS as recordsOPTIONS,
+  PATCH as recordsPATCH,
+  POST as recordsPOST,
+  PUT as recordsPUT,
+} from "./app/api/records/route";
+import {
+  DELETE as mcpDELETE,
+  GET as mcpGET,
+  OPTIONS as mcpOPTIONS,
+  POST as mcpPOST,
+} from "./app/api/mcp/route";
 
 type Env = {
   DB: D1Database;
   ASSETS: Fetcher;
 };
 
-function methodNotAllowed() {
+function methodNotAllowed(allow: string) {
   return Response.json(
     { error: "不支持这种请求方式。" },
     {
       status: 405,
       headers: {
-        Allow: "GET, POST, PUT, PATCH, OPTIONS",
+        Allow: allow,
         "Cache-Control": "no-store",
       },
     },
@@ -28,23 +41,57 @@ function methodNotAllowed() {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    const method = request.method.toUpperCase();
 
     if (url.pathname === "/api/vault" || url.pathname === "/api/vault/") {
       setD1(env.DB);
-
-      switch (request.method.toUpperCase()) {
+      switch (method) {
         case "OPTIONS":
-          return OPTIONS();
+          return vaultOPTIONS();
         case "GET":
-          return GET(request);
+          return vaultGET(request);
         case "PUT":
-          return PUT(request);
+          return vaultPUT(request);
         case "POST":
-          return POST(request);
+          return vaultPOST(request);
         case "PATCH":
-          return PATCH(request);
+          return vaultPATCH(request);
         default:
-          return methodNotAllowed();
+          return methodNotAllowed("GET, POST, PUT, PATCH, OPTIONS");
+      }
+    }
+
+    if (url.pathname === "/api/records" || url.pathname === "/api/records/") {
+      setD1(env.DB);
+      switch (method) {
+        case "OPTIONS":
+          return recordsOPTIONS();
+        case "GET":
+          return recordsGET(request);
+        case "PUT":
+          return recordsPUT(request);
+        case "POST":
+          return recordsPOST(request);
+        case "PATCH":
+          return recordsPATCH(request);
+        default:
+          return methodNotAllowed("GET, POST, PUT, PATCH, OPTIONS");
+      }
+    }
+
+    if (url.pathname === "/api/mcp" || url.pathname === "/api/mcp/") {
+      setD1(env.DB);
+      switch (method) {
+        case "OPTIONS":
+          return mcpOPTIONS(request);
+        case "GET":
+          return mcpGET(request);
+        case "POST":
+          return mcpPOST(request);
+        case "DELETE":
+          return mcpDELETE(request);
+        default:
+          return methodNotAllowed("GET, POST, DELETE, OPTIONS");
       }
     }
 
