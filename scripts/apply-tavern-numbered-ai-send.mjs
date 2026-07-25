@@ -1,7 +1,7 @@
 import fs from "node:fs";
 
 const componentPath = new URL("../app/page.tsx", import.meta.url);
-const stylePath = new URL("../app/page.css", import.meta.url);
+const stylePath = new URL("../app/globals.css", import.meta.url);
 let source = fs.readFileSync(componentPath, "utf8");
 let styles = fs.readFileSync(stylePath, "utf8");
 
