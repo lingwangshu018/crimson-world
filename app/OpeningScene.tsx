@@ -84,11 +84,11 @@ export function OpeningScene() {
 
   if (phase === "closed") {
     return (
-      <div className="tavern-closed-scene" role="dialog" aria-modal="true" aria-label="酒馆暂未入内">
+      <div className="tavern-closed-scene" role="dialog" aria-modal="true" aria-label="暂未进入绯界">
         <div className="closed-card">
           <span aria-hidden="true">☾</span>
-          <h1>木门轻轻合上</h1>
-          <p>酒馆会一直亮着灯。准备好以后，再回来推开这扇门。</p>
+          <h1>门扉轻轻合上</h1>
+          <p>绯界会一直亮着灯。准备好以后，再回来推开这扇门。</p>
           <button type="button" onClick={() => setPhase("permit")}>返回门前</button>
         </div>
       </div>
@@ -102,15 +102,15 @@ export function OpeningScene() {
         <article className="admission-parchment phase-permit">
           <div className="parchment-corner corner-a" aria-hidden="true" />
           <div className="parchment-corner corner-b" aria-hidden="true" />
-          <p className="admission-kicker">CRIMSON TAVERN · ADMISSION</p>
+          <p className="admission-kicker">CRIMSON WORLD · ADMISSION</p>
           <div className="admission-emblem" aria-hidden="true">绯</div>
-          <h1 id="admission-title">推开绯夜酒馆的大门</h1>
+          <h1 id="admission-title">推开绯界的大门</h1>
 
-          <p className="admission-welcome">本酒馆仅向成年人开放。确认年龄后，许可只保存在当前浏览器中，不会连接任何外部认证网站。</p>
+          <p className="admission-welcome">绯界仅向成年人开放。确认年龄后，许可只保存在当前浏览器中，不会连接任何外部认证网站。</p>
 
-          <section className="admission-rules" aria-label="入馆须知">
-            <h2>入馆须知</h2>
-            <p>本酒馆仅接待<strong>已满十八周岁</strong>的客人，内容仅围绕明确成年的虚构人物展开。</p>
+          <section className="admission-rules" aria-label="入界须知">
+            <h2>入界须知</h2>
+            <p>绯界仅接待<strong>已满十八周岁</strong>的访客，内容仅围绕明确成年的虚构人物展开。</p>
             <p>请以自愿、知情、安全与合法为前提使用。</p>
           </section>
 
@@ -133,7 +133,7 @@ export function OpeningScene() {
               value={guestName}
               maxLength={24}
               autoComplete="nickname"
-              placeholder="酒保该如何称呼你？"
+              placeholder="绯界该如何称呼你？"
               onChange={(event) => setGuestName(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") admit();
@@ -144,27 +144,27 @@ export function OpeningScene() {
           {error ? <p className="admission-error" role="alert">{error}</p> : null}
 
           <div className="admission-actions">
-            <button className="sign-button" type="button" onClick={admit}>🍷 我已成年，推门进入</button>
+            <button className="sign-button" type="button" onClick={admit}>✦ 我已成年，进入绯界</button>
             <button className="leave-button" type="button" onClick={() => setPhase("closed")}>转身离开</button>
           </div>
 
           <p className="admission-motto">年龄许可仅写入本机 localStorage，不发送任何网络请求。</p>
-          <div className="wax-seal" aria-hidden="true"><span>CT</span><small>18+</small></div>
+          <div className="wax-seal" aria-hidden="true"><span>界</span><small>18+</small></div>
         </article>
       </div>
     );
   }
 
   return (
-    <div className="opening-scene" role="dialog" aria-modal="true" aria-label="进入绯夜酒馆">
+    <div className="opening-scene" role="dialog" aria-modal="true" aria-label="进入绯界">
       <div className="opening-glow" aria-hidden="true" />
       <div className="opening-doors" aria-hidden="true"><i /><i /></div>
       <div className="opening-content">
         <div className="opening-emblem">绯</div>
-        <p>THE CRIMSON TAVERN</p>
-        <h1>绯夜酒馆</h1>
-        <span>{guestName ? `欢迎，${guestName}。今夜的位置已经替你留好。` : "门铃轻响，今夜的酒单已经为你翻开。"}</span>
-        <button type="button" onClick={() => setPhase("hidden")}>推门而入</button>
+        <p>CRIMSON WORLD</p>
+        <h1>绯界</h1>
+        <span>{guestName ? `欢迎，${guestName}。绯界已经为你点亮。` : "门扉轻启，绯界正在为你展开。"}</span>
+        <button type="button" onClick={() => setPhase("hidden")}>进入绯界</button>
       </div>
     </div>
   );
@@ -188,7 +188,7 @@ export function OpeningPreferenceControl() {
   return (
     <div className="opening-preference-control">
       <strong>开屏动画</strong>
-      <small>年龄许可仅在首次访问时出现；这里控制之后的开门仪式</small>
+      <small>年龄许可仅在首次访问时出现；这里控制之后的进入仪式</small>
       <div>
         {([ ["always", "每次播放"], ["first", "仅首次"], ["off", "关闭"] ] as const).map(([value, label]) => (
           <button key={value} type="button" className={mode === value ? "active" : ""} onClick={() => save(value)}>{label}</button>
