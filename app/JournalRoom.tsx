@@ -13,6 +13,8 @@ type Diary = {
   createdAt: number;
   reply?: string;
   replyAt?: number;
+  vaultSyncedAt?: number;
+  vaultFingerprint?: string;
   paper: PaperStyle;
   customBackground?: string;
 };
@@ -21,9 +23,46 @@ type View = "list" | "write" | "read";
 
 const DIARY_KEY = "lu_shared_diary_v7";
 const FOLDER_KEY = "lu_shared_folders_v7";
+const OWNER_KEY = "crimson-tavern.vault-owner-key.v1";
+const READ_KEY = "crimson-tavern.vault-read-key.v1";
+const REPLY_KEY = "crimson-tavern.vault-note-key.v1";
+const RECORDS_API_URL =
+  "https://crimson-world.lingwangshu018.workers.dev/api/records";
 
 function uid() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function createVaultKey() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
+  return `ctv1_${window
+    .btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "")}`;
+}
+
+function ensureVaultKeys() {
+  let ownerKey = localStorage.getItem(OWNER_KEY) || "";
+  let readKey = localStorage.getItem(READ_KEY) || "";
+  let replyKey = localStorage.getItem(REPLY_KEY) || "";
+
+  if (!ownerKey) {
+    ownerKey = createVaultKey();
+    localStorage.setItem(OWNER_KEY, ownerKey);
+  }
+  if (!readKey || readKey === ownerKey) {
+    readKey = createVaultKey();
+    localStorage.setItem(READ_KEY, readKey);
+  }
+  if (!replyKey || replyKey === ownerKey || replyKey === readKey) {
+    replyKey = createVaultKey();
+    localStorage.setItem(REPLY_KEY, replyKey);
+  }
+
+  return { ownerKey, readKey, replyKey };
 }
 
 function formatDate(value?: number) {
@@ -56,9 +95,23 @@ function normalizeDiary(value: unknown): Diary | null {
     createdAt: Number(item.createdAt ?? item.created_at ?? Date.now()),
     reply: String(item.reply ?? item.reply_content ?? "") || undefined,
     replyAt: Number(item.replyAt ?? item.reply_at ?? 0) || undefined,
+    vaultSyncedAt: Number(item.vaultSyncedAt ?? 0) || undefined,
+    vaultFingerprint: String(item.vaultFingerprint ?? "") || undefined,
     paper: item.paper ?? item.bg_style ?? "default",
     customBackground: String(item.customBackground ?? item.custom_bg ?? "") || undefined,
   };
+}
+
+function recordFingerprint(diary: Diary) {
+  return JSON.stringify([
+    diary.id,
+    diary.title,
+    diary.content,
+    diary.folderId,
+    diary.createdAt,
+    diary.reply || "",
+    diary.replyAt || 0,
+  ]);
 }
 
 export function JournalRoom({ onClose }: { onClose: () => void }) {
@@ -154,24 +207,119 @@ export function JournalRoom({ onClose }: { onClose: () => void }) {
     if (!current) return;
     const next = window.prompt("修改日记内容：", current.content);
     if (next === null) return;
-    persist(diaries.map((diary) => diary.id === current.id ? { ...diary, content: next } : diary));
+    persist(diaries.map((diary) => diary.id === current.id ? { ...diary, content: next, vaultSyncedAt: undefined, vaultFingerprint: undefined } : diary));
   }
 
   function pasteReply() {
     if (!current) return;
     const reply = window.prompt("贴入机的回信：", current.reply || "");
     if (reply === null) return;
-    persist(diaries.map((diary) => diary.id === current.id ? { ...diary, reply, replyAt: Date.now() } : diary));
+    persist(diaries.map((diary) => diary.id === current.id ? { ...diary, reply, replyAt: Date.now(), vaultSyncedAt: undefined, vaultFingerprint: undefined } : diary));
+  }
+
+  async function syncDiaryRecord(diary: Diary) {
+    const keys = ensureVaultKeys();
+    const createdAt = new Date(diary.createdAt).toISOString();
+    const updatedAt = new Date(diary.replyAt || diary.createdAt).toISOString();
+    const folderName = folders.find((item) => item.id === diary.folderId)?.name || "";
+
+    const response = await fetch(RECORDS_API_URL, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${keys.ownerKey}`,
+        "X-Crimson-Key": keys.ownerKey,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        readKey: keys.readKey,
+        replyKey: keys.replyKey,
+        records: [
+          {
+            id: diary.id,
+            module: "journal",
+            title: diary.title,
+            summary: diary.content.slice(0, 240),
+            content: diary.content,
+            note: diary.reply || "",
+            createdAt,
+            updatedAt,
+            noteUpdatedAt: diary.replyAt
+              ? new Date(diary.replyAt).toISOString()
+              : null,
+            metadata: {
+              moduleName: "我们的日记",
+              folderId: diary.folderId || null,
+              folderName: folderName || null,
+              paper: diary.paper,
+              source: DIARY_KEY,
+            },
+          },
+        ],
+      }),
+    });
+
+    const data = (await response.json().catch(() => ({}))) as {
+      error?: string;
+      syncedIds?: string[];
+    };
+    if (!response.ok || !data.syncedIds?.includes(diary.id)) {
+      throw new Error(data.error || `同步失败（HTTP ${response.status}）`);
+    }
+
+    const syncedAt = Date.now();
+    const fingerprint = recordFingerprint(diary);
+    persist(
+      diaries.map((item) =>
+        item.id === diary.id
+          ? { ...item, vaultSyncedAt: syncedAt, vaultFingerprint: fingerprint }
+          : item,
+      ),
+    );
+
+    return keys;
   }
 
   async function requestReply() {
     if (!current) return;
-    const text = `这是我在日记里写下的一篇心事：\n【标题】：${current.title}\n【内容】：${current.content}\n\n（请直接回复回信正文即可，我会贴进日记本里。）`;
     try {
+      const { readKey, replyKey } = await syncDiaryRecord(current);
+      const displayNumber = `JR-${String(
+        Math.max(1, diaries.findIndex((item) => item.id === current.id) + 1),
+      ).padStart(4, "0")}`;
+      const text = [
+        "请读取我的绯界记录，并继续完成这一事件。",
+        "",
+        "【模块】",
+        "我们的日记",
+        "",
+        "【记录编号】",
+        displayNumber,
+        "",
+        "【记录ID】",
+        current.id,
+        "",
+        "【读取钥匙】",
+        readKey,
+        "",
+        "【回复钥匙】",
+        replyKey,
+        "",
+        "请先调用绯界工具 crimson_read_record，使用上面的记录ID与读取钥匙精确读取本篇日记。",
+        "",
+        "结合当前聊天已经加载的角色卡、世界书和近期记忆，根据日记标题与正文写一封完整回信。",
+        "",
+        "完成后，请调用 crimson_write_reply，使用完全相同的记录ID与回复钥匙，将完整回信写回 note 字段。",
+        "",
+        "不要修改原始记录，不要创建新记录，不要回复其他记录。",
+        "只处理这一条。",
+      ].join("\n");
+
       await navigator.clipboard.writeText(text);
-      window.alert("✨ 呼唤机回信的暗号已经复制啦！写好回信后，点右上角的 ✎ 贴回来。");
-    } catch {
-      window.prompt("复制这段暗号：", text);
+      window.alert("✨ 日记已同步到绯界云端，任务单也复制好了。现在可以直接粘贴给 AI。");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "同步失败，请稍后重试。";
+      window.alert(`日记没有同步成功：${message}`);
     }
   }
 
