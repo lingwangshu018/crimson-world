@@ -25,6 +25,7 @@ const patches = [
   { file: "apply-cloud-key-center.mjs", label: "three-key cloud identity center" },
   { file: "apply-unified-module-cloud-status.mjs", label: "unified module cloud status and key migration" },
   { file: "apply-time-wheel-history-layout-fix.mjs", label: "time wheel mobile history layout" },
+  { file: "apply-time-wheel-confirm-only.mjs", label: "time wheel simple confirmation" },
   { file: "apply-study-room.mjs", label: "study rooms" },
 ];
 
