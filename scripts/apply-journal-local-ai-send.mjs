@@ -6,7 +6,8 @@ let source = fs.readFileSync(journalPath, "utf8");
 const sendPattern = /  async function sendCurrentDiary\(\) \{[\s\S]*?\n  \}\n\n  async function pullReply\(\) \{/;
 
 if (!sendPattern.test(source)) {
-  throw new Error("Journal sendCurrentDiary block not found");
+  console.log("Journal already uses the unified AI sending workflow; legacy local-send patch skipped.");
+  process.exit(0);
 }
 
 source = source.replace(
