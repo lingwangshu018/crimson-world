@@ -1,0 +1,106 @@
+{
+  "id": "com.orangechat.plugin.crimson-world",
+  "name": "绯界",
+  "description": "让 OrangeChat AI 使用读取钥匙读取绯界中的指定记录，并使用回复钥匙把完整回复追加写回同一条记录的 note 字段。只处理用户指定的记录，不创建新记录，也不修改原始正文。",
+  "version": "1.0.0",
+  "author": "曦和",
+  "icon": "🌹",
+  "entry": "main.js",
+  "customPageWebView": {
+    "entry": "ui/index.html"
+  },
+  "config": [
+    {
+      "name": "api_url",
+      "type": "string",
+      "label": "绯界数据接口",
+      "description": "绯界云端读写接口。通常保持默认值即可。",
+      "required": false,
+      "placeholder": "https://crimson-tavern.boarder-72pound.chatgpt.site/api/vault"
+    },
+    {
+      "name": "read_key",
+      "type": "string",
+      "label": "AI 读取钥匙",
+      "description": "可选。填写后，AI 无需每次从任务单中传入读取钥匙。",
+      "required": false,
+      "placeholder": "ctv1_..."
+    },
+    {
+      "name": "reply_key",
+      "type": "string",
+      "label": "AI 回复钥匙",
+      "description": "可选。填写后，AI 无需每次从任务单中传入回复钥匙。",
+      "required": false,
+      "placeholder": "ctv1_..."
+    }
+  ],
+  "tools": [
+    {
+      "name": "read_crimson_record",
+      "description": "读取绯界中用户指定的一条记录。必须优先按 record_id 精确匹配；不要把相似记录当作目标记录。读取后返回完整记录内容，供 AI 结合当前聊天中的角色卡、世界书和近期记忆继续创作。",
+      "parameters": [
+        {
+          "name": "record_id",
+          "type": "string",
+          "required": true,
+          "description": "任务单中的记录ID，例如 de62eb88-..."
+        },
+        {
+          "name": "read_key",
+          "type": "string",
+          "required": false,
+          "description": "任务单中的读取钥匙。若插件设置已填写，可省略。"
+        }
+      ]
+    },
+    {
+      "name": "write_crimson_reply",
+      "description": "把 AI 已完成的完整回复追加写回指定绯界记录的 note 字段。只能写入用户明确指定的 record_id；不得创建新记录、改写原始正文或写入其他记录。",
+      "parameters": [
+        {
+          "name": "record_id",
+          "type": "string",
+          "required": true,
+          "description": "必须与读取时完全相同的记录ID"
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "要写回 note 字段的完整最终回复，不要只写摘要"
+        },
+        {
+          "name": "reply_key",
+          "type": "string",
+          "required": false,
+          "description": "任务单中的回复钥匙。若插件设置已填写，可省略。"
+        }
+      ]
+    },
+    {
+      "name": "search_crimson_records",
+      "description": "仅在用户没有提供准确记录ID、或需要排查记录是否存在时搜索绯界记录。正式续写任务应优先使用 read_crimson_record。",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "记录编号、标题、关键词或记录ID片段"
+        },
+        {
+          "name": "read_key",
+          "type": "string",
+          "required": false,
+          "description": "读取钥匙。若插件设置已填写，可省略。"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "最多返回多少条，默认 10，最大 25"
+        }
+      ]
+    }
+  ]
+}
