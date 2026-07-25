@@ -101,14 +101,42 @@ replace(
   }
 
   function makeReplyInstruction(diary: Diary, readKey: string, replyKey: string) {
+    const displayNumber = \`JR-${'${String(diaries.findIndex((item) => item.id === diary.id) + 1).padStart(4, "0")}'}\`;
     return [
-      "请读取我的绯界日记并直接回信。",
-      "指定日记 ID：" + diary.id,
-      "读信钥匙：" + readKey,
-      "回信钥匙：" + replyKey,
-      "档案接口：" + VAULT_API_URL,
+      "请读取我的绯界记录，并继续完成这一事件。",
       "",
-      "请只读取这篇指定日记；根据标题和正文写一封完整回信，然后使用回信钥匙把回信写入该记录的 note 字段，不要修改日记原文。",
+      "模块：我们的日记",
+      "",
+      "【记录编号】",
+      displayNumber,
+      "",
+      "【记录ID】",
+      diary.id,
+      "",
+      "【读取钥匙】",
+      readKey,
+      "",
+      "【回复钥匙】",
+      replyKey,
+      "",
+      "请读取本条记录。",
+      "",
+      "结合：",
+      "• 角色卡",
+      "• 世界书",
+      "• 近期记忆",
+      "",
+      "根据这篇日记的标题与正文，写一封完整回信。",
+      "",
+      "完成后请使用回复钥匙",
+      "写回 note 字段。",
+      "",
+      "不要：",
+      "• 修改原记录",
+      "• 创建新记录",
+      "• 回复其它记录",
+      "",
+      "只处理这一条。",
     ].join("\\n");
   }
 
@@ -134,9 +162,8 @@ replace(
     localStorage.setItem(JOURNAL_OWNER_KEY, ownerKey);
     localStorage.setItem(JOURNAL_READ_KEY, readKey);
     localStorage.setItem(JOURNAL_REPLY_KEY, replyKey);
-    const hadSent = Boolean(current.vaultSyncedAt);
     setMailboxBusy("send");
-    setMailboxMessage(hadSent ? "正在更新这篇日记……" : "正在把这篇日记送进 AI 信箱……");
+    setMailboxMessage("正在发送这篇日记……");
     try {
       const response = await fetch(VAULT_API_URL, {
         method: "PUT",
@@ -154,7 +181,7 @@ replace(
       const fingerprint = diaryFingerprint(current);
       persist(diaries.map((diary) => diary.id === current.id ? { ...diary, vaultSyncedAt: syncedAt, vaultFingerprint: fingerprint } : diary));
       const copied = await copyInstruction(makeReplyInstruction(current, readKey, replyKey));
-      setMailboxMessage(copied ? (hadSent ? "日记已更新，AI 读信指令也已复制。✨" : "日记已发送，AI 读信指令也已复制。✨") : (hadSent ? "日记已更新，请复制弹窗里的 AI 指令。" : "日记已发送，请复制弹窗里的 AI 指令。"));
+      setMailboxMessage(copied ? "日记已发送，发送模板也已复制。✨" : "日记已发送，请复制弹窗里的发送模板。");
     } catch (error) {
       setMailboxMessage(error instanceof Error ? error.message : "发送暂时没有成功");
     } finally { setMailboxBusy(null); }
@@ -189,7 +216,7 @@ replace(
               const sent = Boolean(current.vaultSyncedAt);
               const changed = sent && current.vaultFingerprint !== diaryFingerprint(current);
               const stateText = current.reply ? "💌 已回信" : changed ? "✎ 有未同步修改" : sent ? "☁ 等待回信" : "○ 仅本地";
-              const sendText = mailboxBusy === "send" ? "处理中…" : sent ? (changed ? "🔄 更新并发送" : "🔄 重新发送") : "📨 发送给 AI";
+              const sendText = mailboxBusy === "send" ? "处理中…" : "📨 发送";
               return <section className="journal-mailbox">
                 <header><div><b>AI 信箱</b><small>{sent ? \`最近发送 ${'${formatDate(current.vaultSyncedAt)}'}\` : "这篇日记还没有发送"}</small></div><span>{stateText}</span></header>
                 <div className="journal-mailbox-actions">
