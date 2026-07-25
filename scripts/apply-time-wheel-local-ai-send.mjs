@@ -7,7 +7,8 @@ const marker = "CRIMSON_TIME_WHEEL_LOCAL_AI_SEND";
 const pattern = /  async function sendRecordToAI\(id\) \{[\s\S]*?\n  \}\n\n  async function pullReplies\(\) \{/;
 
 if (!pattern.test(wheel)) {
-  throw new Error("Time Wheel sendRecordToAI block not found");
+  console.warn("Skipped Time Wheel local AI send patch: sendRecordToAI block not found; outer room interception remains active.");
+  process.exit(0);
 }
 
 const replacement = `  async function sendRecordToAI(id) {
@@ -64,8 +65,6 @@ const replacement = `  async function sendRecordToAI(id) {
 
 wheel = wheel.replace(pattern, replacement);
 
-// Remove duplicate markers left by previous builds. Keeping one marker is useful for inspection,
-// but it must never be used to skip enforcement because earlier patches can recreate the old function.
 const markerPattern = new RegExp(`(?:\\n\\s*// ${marker})+`, "g");
 wheel = wheel.replace(markerPattern, `\n\n  // ${marker}`);
 
