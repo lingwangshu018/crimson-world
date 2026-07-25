@@ -67,19 +67,16 @@ if (!cloud.includes("CRIMSON_ASSISTIVE_CLOUD_MENU")) {
     await saveToCloud();
   }
 
-  function navigateTo(space: "tavern" | "journal") {
+  function returnToPreviousPage() {
     setAssistiveOpen(false);
     setOpen(false);
-    window.dispatchEvent(new CustomEvent("crimson:navigate", { detail: { space } }));
+    window.history.back();
   }
 
-  function returnFromCurrentPage() {
+  function returnToHomePage() {
     setAssistiveOpen(false);
-    if (open) {
-      setOpen(false);
-      return;
-    }
-    window.dispatchEvent(new CustomEvent("crimson:return"));
+    setOpen(false);
+    window.dispatchEvent(new CustomEvent("crimson:home"));
   }`,
   );
 
@@ -96,9 +93,8 @@ if (!cloud.includes("CRIMSON_ASSISTIVE_CLOUD_MENU")) {
           <nav className="assistive-cloud-menu" aria-label="绯界快捷菜单" style={{ left: position.x, top: position.y }}>
             <button type="button" onClick={() => void quickSaveToCloud()} disabled={Boolean(busy)}><span>☁️</span><small>{busy === "save" ? "保存中" : "云端保存"}</small></button>
             <button type="button" onClick={openArchive}><span>📜</span><small>存档中心</small></button>
-            <button type="button" onClick={() => navigateTo("journal")}><span>📖</span><small>日记本</small></button>
-            <button type="button" onClick={() => navigateTo("tavern")}><span>🍷</span><small>酒馆</small></button>
-            <button type="button" onClick={returnFromCurrentPage}><span>↩</span><small>返回</small></button>
+            <button type="button" onClick={returnToPreviousPage}><span>↩</span><small>返回上一页</small></button>
+            <button type="button" onClick={returnToHomePage}><span>🏠</span><small>回到主页面</small></button>
             <button type="button" onClick={() => setAssistiveOpen(false)}><span>×</span><small>收起</small></button>
           </nav>
         </>
@@ -113,22 +109,15 @@ if (!cloud.includes("CRIMSON_ASSISTIVE_CLOUD_MENU")) {
 if (!nav.includes("CRIMSON_ASSISTIVE_NAV_EVENTS")) {
   const marker = "  // CRIMSON_ASSISTIVE_NAV_EVENTS";
   const eventEffect = `  useEffect(() => {
-    function onNavigate(event: Event) {
-      const detail = (event as CustomEvent<{ space?: RoomId }>).detail;
-      const targetRoom = roomRegistry.find((room) => room.id === detail?.space);
-      if (targetRoom) selectSpace(targetRoom);
+    function onHome() {
+      selectSpace(roomRegistry[0]);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-    function onReturn() {
-      if (active === "tavern") window.history.back();
-      else selectSpace(roomRegistry[0]);
-    }
-    window.addEventListener("crimson:navigate", onNavigate);
-    window.addEventListener("crimson:return", onReturn);
+    window.addEventListener("crimson:home", onHome);
     return () => {
-      window.removeEventListener("crimson:navigate", onNavigate);
-      window.removeEventListener("crimson:return", onReturn);
+      window.removeEventListener("crimson:home", onHome);
     };
-  }, [active]);
+  }, []);
 
 ${marker}`;
 
