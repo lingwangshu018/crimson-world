@@ -48,10 +48,33 @@ function migrateLegacyCloudConfiguration() {
 }
 
 if (!journal.includes(marker)) {
-  const stateLine = '  const [showMailboxDetails, setShowMailboxDetails] = useState(false);';
-  journal = journal.replace(stateLine, `  // ${marker}`);
+  const hasNativeUnifiedWorkflow =
+    journal.includes("const RECORDS_API_URL") &&
+    journal.includes("async function syncDiaryRecord") &&
+    journal.includes("ensureVaultKeys");
 
-  const generatedKeyBlock = `    let ownerKey = vaultOwnerKey;
+  if (hasNativeUnifiedWorkflow) {
+    const clientDirective = `"use client";`;
+    if (journal.includes(clientDirective)) {
+      journal = journal.replace(
+        clientDirective,
+        `${clientDirective}\n\n// ${marker}`,
+      );
+    } else {
+      journal = `// ${marker}\n${journal}`;
+    }
+    console.log(
+      "Journal already uses the native unified records workflow; legacy cloud-status rewrite skipped.",
+    );
+  } else {
+    const stateLine = '  const [showMailboxDetails, setShowMailboxDetails] = useState(false);';
+    if (journal.includes(stateLine)) {
+      journal = journal.replace(stateLine, `  // ${marker}`);
+    } else {
+      journal = `// ${marker}\n${journal}`;
+    }
+
+    const generatedKeyBlock = `    let ownerKey = vaultOwnerKey;
     let readKey = vaultReadKey;
     let replyKey = vaultReplyKey;
     if (!VAULT_KEY_PATTERN.test(ownerKey)) ownerKey = createVaultKey();
@@ -62,7 +85,7 @@ if (!journal.includes(marker)) {
     localStorage.setItem(JOURNAL_READ_KEY, readKey);
     localStorage.setItem(JOURNAL_REPLY_KEY, replyKey);`;
 
-  const sharedKeyBlock = `    const ownerKey = localStorage.getItem(JOURNAL_OWNER_KEY) || vaultOwnerKey;
+    const sharedKeyBlock = `    const ownerKey = localStorage.getItem(JOURNAL_OWNER_KEY) || vaultOwnerKey;
     const readKey = localStorage.getItem(JOURNAL_READ_KEY) || vaultReadKey;
     const replyKey = localStorage.getItem(JOURNAL_REPLY_KEY) || vaultReplyKey;
     if (!VAULT_API_URL.trim()) {
@@ -75,14 +98,23 @@ if (!journal.includes(marker)) {
     }
     setVaultOwnerKey(ownerKey); setVaultReadKey(readKey); setVaultReplyKey(replyKey);`;
 
-  if (!journal.includes(generatedKeyBlock)) throw new Error("Journal generated-key block not found");
-  journal = journal.replace(generatedKeyBlock, sharedKeyBlock);
+    if (journal.includes(generatedKeyBlock)) {
+      journal = journal.replace(generatedKeyBlock, sharedKeyBlock);
+    } else {
+      console.log(
+        "Journal legacy generated-key block was not found; key rewrite skipped.",
+      );
+    }
 
-  const detailsBlock = `<button className="journal-mailbox-details-toggle" onClick={() => setShowMailboxDetails((value) => !value)}>{showMailboxDetails ? "收起高级信息" : "▸ 高级信息"}</button>
+    const detailsBlock = `<button className="journal-mailbox-details-toggle" onClick={() => setShowMailboxDetails((value) => !value)}>{showMailboxDetails ? "收起高级信息" : "▸ 高级信息"}</button>
                 {showMailboxDetails ? <dl><div><dt>读信钥匙</dt><dd>{maskedVaultKey(vaultReadKey)}</dd></div><div><dt>回信钥匙</dt><dd>{maskedVaultKey(vaultReplyKey)}</dd></div><div><dt>日记编号</dt><dd>JR-{String(diaries.findIndex((diary) => diary.id === current.id) + 1).padStart(4, "0")}</dd></div><div><dt>真实 ID</dt><dd><button onClick={() => navigator.clipboard.writeText(current.id)}>复制</button></dd></div></dl> : null}`;
-  const statusBlock = `<p className="journal-cloud-connection">{VAULT_API_URL && VAULT_KEY_PATTERN.test(vaultOwnerKey) && VAULT_KEY_PATTERN.test(vaultReadKey) && VAULT_KEY_PATTERN.test(vaultReplyKey) ? "☁️ 已连接绯界云端" : "⚠️ 请前往绯界控制中心配置云端"}</p>`;
-  if (!journal.includes(detailsBlock)) throw new Error("Journal key details block not found");
-  journal = journal.replace(detailsBlock, statusBlock);
+    const statusBlock = `<p className="journal-cloud-connection">{VAULT_API_URL && VAULT_KEY_PATTERN.test(vaultOwnerKey) && VAULT_KEY_PATTERN.test(vaultReadKey) && VAULT_KEY_PATTERN.test(vaultReplyKey) ? "☁️ 已连接绯界云端" : "⚠️ 请前往绯界控制中心配置云端"}</p>`;
+    if (journal.includes(detailsBlock)) {
+      journal = journal.replace(detailsBlock, statusBlock);
+    } else {
+      console.log("Journal legacy key-details block was not found; status rewrite skipped.");
+    }
+  }
 }
 
 if (!wheel.includes(marker)) {
