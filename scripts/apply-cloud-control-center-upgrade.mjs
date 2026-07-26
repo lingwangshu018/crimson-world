@@ -45,11 +45,11 @@ replace(
         id: String(item.id),
         createdAt: new Date(Number(item.createdAt || Date.now())).toISOString(),
         kind: "house",
-        drinkName: String(item.title || "未命名的心事"),
-        bartender: "日记本",
-        guest: "回信人",
+        drinkName: String(item.title || "鏈懡鍚嶇殑蹇冧簨"),
+        bartender: "鏃ヨ鏈?,
+        guest: "鍥炰俊浜?,
         bartenderLine: String(item.content || ""),
-        items: [{ id: "diary", course: "日记正文", dimension: "信件", zh: String(item.title || "日记"), en: "", ja: "" }],
+        items: [{ id: "diary", course: "鏃ヨ姝ｆ枃", dimension: "淇′欢", zh: String(item.title || "鏃ヨ"), en: "", ja: "" }],
         note: String(item.reply || ""),
         noteUpdatedAt: item.replyAt ? new Date(Number(item.replyAt)).toISOString() : null,
         journal: { folderId: item.folderId || "", paper: item.paper || "default" },
@@ -58,18 +58,18 @@ replace(
         id: String(item.id),
         createdAt: new Date(Number(item.created_at || Date.now())).toISOString(),
         kind: "house",
-        drinkName: String(item.module_name || "时光之轮记录"),
-        bartender: "时光之轮",
-        guest: String(item.topic || "无主题"),
+        drinkName: String(item.module_name || "鏃跺厜涔嬭疆璁板綍"),
+        bartender: "鏃跺厜涔嬭疆",
+        guest: String(item.topic || "鏃犱富棰?),
         bartenderLine: String(item.content || ""),
-        items: [{ id: "time-wheel", course: "运行记录", dimension: "时光之轮", zh: String(item.module_name || "时光记录"), en: "", ja: "" }],
+        items: [{ id: "time-wheel", course: "杩愯璁板綍", dimension: "鏃跺厜涔嬭疆", zh: String(item.module_name || "鏃跺厜璁板綍"), en: "", ja: "" }],
         note: String(item.ai_reply || ""),
         noteUpdatedAt: item.ai_reply_at ? new Date(Number(item.ai_reply_at)).toISOString() : null,
         timeWheel: { topic: item.topic || "", sourceId: item.id },
       }));
       const combinedRecords = [...records, ...journalCloudRecords, ...timeWheelCloudRecords];
       const endpoint = apiUrl.trim() || DEFAULT_API_URL;
-      if (!validApiUrl(endpoint)) throw new Error("统一档案 API 地址格式不正确");
+      if (!validApiUrl(endpoint)) throw new Error("缁熶竴妗ｆ API 鍦板潃鏍煎紡涓嶆纭?);
       const response = await fetch(endpoint, {`,
 );
 
@@ -86,7 +86,10 @@ replace(
 replace(
   '      const records = Array.isArray(result.records) ? result.records : [];\n      const first = records[0] as { guest?: unknown; bartender?: unknown } | undefined;',
   `      const records = Array.isArray(result.records) ? result.records : [];
-      const tavernRecords = records.filter((item) => !(item as Record<string, unknown>).journal && !(item as Record<string, unknown>).timeWheel);
+      const tavernRecords = records.filter((item) => {
+        const record = item as Record<string, unknown>;
+        return !record.journal && !record.timeWheel && record.module !== "cafe" && !String(record.id || "").startsWith("cafe-");
+      });
       const first = tavernRecords[0] as { guest?: unknown; bartender?: unknown } | undefined;`,
 );
 
@@ -96,55 +99,57 @@ replace(
 );
 
 replace(
-  '      setMessage(`全部档案已经回来：${records.length} 杯酒、${cloudJournal.length} 篇日记、${cloudTimeWheelHistory.length} 条时光记录。`);',
-  '      setRecordCount(tavernRecords.length);\n      setMessage(`全部档案已经回来：${tavernRecords.length} 杯酒、${cloudJournal.length} 篇日记、${cloudTimeWheelHistory.length} 条时光记录。`);',
+  '      setMessage(`鍏ㄩ儴妗ｆ宸茬粡鍥炴潵锛?{records.length} 鏉厭銆?{cloudJournal.length} 绡囨棩璁般€?{cloudTimeWheelHistory.length} 鏉℃椂鍏夎褰曘€俙);',
+  '      setRecordCount(tavernRecords.length);\n      setMessage(`鍏ㄩ儴妗ｆ宸茬粡鍥炴潵锛?{tavernRecords.length} 鏉厭銆?{cloudJournal.length} 绡囨棩璁般€?{cloudTimeWheelHistory.length} 鏉℃椂鍏夎褰曘€俙);',
 );
 
 replace(
-  '        if (payload.type !== "crimson-world-full-backup") throw new Error("这不是绯界完整备份文件");\n        write(HISTORY_KEY, JSON.stringify(payload.tavern?.history || []));\n        write(SETTINGS_KEY, JSON.stringify(payload.tavern?.settings || {}));\n        write(JOURNAL_KEY, JSON.stringify(payload.journal?.diaries || []));\n        write(JOURNAL_FOLDER_KEY, JSON.stringify(payload.journal?.folders || []));\n        write(TIME_WHEEL_HISTORY_KEY, JSON.stringify(payload.timeWheel?.history || []));\n        write(TIME_WHEEL_MODULES_KEY, JSON.stringify(payload.timeWheel?.modules || []));',
-  `        if (payload.type !== "crimson-world-full-backup") throw new Error("这不是绯界完整备份文件");
+  '        if (payload.type !== "crimson-world-full-backup") throw new Error("杩欎笉鏄化鐣屽畬鏁村浠芥枃浠?);\n        write(HISTORY_KEY, JSON.stringify(payload.tavern?.history || []));\n        write(SETTINGS_KEY, JSON.stringify(payload.tavern?.settings || {}));\n        write(JOURNAL_KEY, JSON.stringify(payload.journal?.diaries || []));\n        write(JOURNAL_FOLDER_KEY, JSON.stringify(payload.journal?.folders || []));\n        write(TIME_WHEEL_HISTORY_KEY, JSON.stringify(payload.timeWheel?.history || []));\n        write(TIME_WHEEL_MODULES_KEY, JSON.stringify(payload.timeWheel?.modules || []));',
+  `        if (payload.type !== "crimson-world-full-backup") throw new Error("杩欎笉鏄化鐣屽畬鏁村浠芥枃浠?);
         const replaceAll = window.confirm([
-          "请选择导入方式：",
+          "璇烽€夋嫨瀵煎叆鏂瑰紡锛?,
           "",
-          "确定：覆盖当前全部数据",
-          "取消：与当前数据合并",
+          "纭畾锛氳鐩栧綋鍓嶅叏閮ㄦ暟鎹?,
+          "鍙栨秷锛氫笌褰撳墠鏁版嵁鍚堝苟",
         ].join("\\n"));
         const incomingTavern = Array.isArray(payload.tavern?.history) ? payload.tavern.history : [];
         const incomingJournal = Array.isArray(payload.journal?.diaries) ? payload.journal.diaries : [];
         const incomingFolders = Array.isArray(payload.journal?.folders) ? payload.journal.folders : [];
         const incomingTimeHistory = Array.isArray(payload.timeWheel?.history) ? payload.timeWheel.history : [];
         const incomingTimeModules = Array.isArray(payload.timeWheel?.modules) ? payload.timeWheel.modules : [];
+        const incomingCafe = Array.isArray(payload.cafe?.records) ? payload.cafe.records : [];
         write(HISTORY_KEY, JSON.stringify(replaceAll ? incomingTavern : mergeRecordsById(JSON.parse(read(HISTORY_KEY) || "[]"), incomingTavern)));
         write(SETTINGS_KEY, JSON.stringify({ ...JSON.parse(read(SETTINGS_KEY) || "{}"), ...(payload.tavern?.settings || {}) }));
         write(JOURNAL_KEY, JSON.stringify(replaceAll ? incomingJournal : mergeRecordsById(JSON.parse(read(JOURNAL_KEY) || "[]"), incomingJournal)));
         write(JOURNAL_FOLDER_KEY, JSON.stringify(replaceAll ? incomingFolders : mergeRecordsById(JSON.parse(read(JOURNAL_FOLDER_KEY) || "[]"), incomingFolders)));
         write(TIME_WHEEL_HISTORY_KEY, JSON.stringify(replaceAll ? incomingTimeHistory : mergeRecordsById(JSON.parse(read(TIME_WHEEL_HISTORY_KEY) || "[]"), incomingTimeHistory)));
-        write(TIME_WHEEL_MODULES_KEY, JSON.stringify(replaceAll ? incomingTimeModules : mergeRecordsById(JSON.parse(read(TIME_WHEEL_MODULES_KEY) || "[]"), incomingTimeModules)));`,
+        write(TIME_WHEEL_MODULES_KEY, JSON.stringify(replaceAll ? incomingTimeModules : mergeRecordsById(JSON.parse(read(TIME_WHEEL_MODULES_KEY) || "[]"), incomingTimeModules)));
+        write(CAFE_RECORDS_KEY, JSON.stringify(replaceAll ? incomingCafe : mergeRecordsById(JSON.parse(read(CAFE_RECORDS_KEY) || "[]"), incomingCafe)));`,
 );
 
 replace(
-  '<div><p>CRIMSON TAVERN ARCHIVE</p><h2>酒馆档案</h2></div>',
-  '<div><p>CRIMSON WORLD CONTROL CENTER</p><h2>绯界控制中心</h2></div>',
+  '<div><p>CRIMSON TAVERN ARCHIVE</p><h2>閰掗妗ｆ</h2></div>',
+  '<div><p>CRIMSON WORLD CONTROL CENTER</p><h2>缁晫鎺у埗涓績</h2></div>',
 );
 
 replace(
-  'aria-label="酒馆档案"',
-  'aria-label="绯界控制中心"',
+  'aria-label="閰掗妗ｆ"',
+  'aria-label="缁晫鎺у埗涓績"',
 );
 
 replace(
-  '<section><h3>📦 全部项目</h3><div className="cellar-actions-grid">',
-  '<section className="control-center-section"><h3>📦 数据与回信</h3><p className="cellar-intro">本地备份不包含任何钥匙；全部同步会把三个项目写入同一份云档案。</p><div className="cellar-actions-grid">',
+  '<section><h3>馃摝 鍏ㄩ儴椤圭洰</h3><div className="cellar-actions-grid">',
+  '<section className="control-center-section"><h3>馃摝 鏁版嵁涓庡洖淇?/h3><p className="cellar-intro">鏈湴澶囦唤涓嶅寘鍚换浣曢挜鍖欙紱鍏ㄩ儴鍚屾浼氭妸涓変釜椤圭洰鍐欏叆鍚屼竴浠戒簯妗ｆ銆?/p><div className="cellar-actions-grid">',
 );
 
 replace(
-  '<label>统一档案 API<input value={apiUrl} onChange={(event) => setApiUrl(event.target.value)} onBlur={() => write(API_URL_KEY, apiUrl || DEFAULT_API_URL)} /></label><div className="patron-key"><code>{mask(ownerKey)}</code>{ownerKey ? <button type="button" onClick={copyKey}>复制主钥匙</button> : null}</div><small>酒馆、日记和时光之轮会共同使用这里的 API、主钥匙、读取钥匙和回复钥匙。</small>',
-  `<label>统一档案 API<input value={apiUrl} onChange={(event) => setApiUrl(event.target.value)} onBlur={() => { const next = apiUrl.trim() || DEFAULT_API_URL; if (validApiUrl(next)) { write(API_URL_KEY, next); setApiUrl(next); } else { setMessage("API 地址格式不正确，已恢复默认地址。"); setApiUrl(DEFAULT_API_URL); write(API_URL_KEY, DEFAULT_API_URL); } }} /></label>
+  '<label>缁熶竴妗ｆ API<input value={apiUrl} onChange={(event) => setApiUrl(event.target.value)} onBlur={() => write(API_URL_KEY, apiUrl || DEFAULT_API_URL)} /></label><div className="patron-key"><code>{mask(ownerKey)}</code>{ownerKey ? <button type="button" onClick={copyKey}>澶嶅埗涓婚挜鍖?/button> : null}</div><small>閰掗銆佹棩璁板拰鏃跺厜涔嬭疆浼氬叡鍚屼娇鐢ㄨ繖閲岀殑 API銆佷富閽ュ寵銆佽鍙栭挜鍖欏拰鍥炲閽ュ寵銆?/small>',
+  `<label>缁熶竴妗ｆ API<input value={apiUrl} onChange={(event) => setApiUrl(event.target.value)} onBlur={() => { const next = apiUrl.trim() || DEFAULT_API_URL; if (validApiUrl(next)) { write(API_URL_KEY, next); setApiUrl(next); } else { setMessage("API 鍦板潃鏍煎紡涓嶆纭紝宸叉仮澶嶉粯璁ゅ湴鍧€銆?); setApiUrl(DEFAULT_API_URL); write(API_URL_KEY, DEFAULT_API_URL); } }} /></label>
                 <div className="advanced-key-list">
-                  <div><span>主钥匙</span><code>{mask(ownerKey)}</code>{ownerKey ? <button type="button" onClick={copyKey}>复制</button> : null}</div>
-                  <div><span>读取钥匙</span><code>{mask(read(READ_KEY))}</code><button type="button" onClick={() => navigator.clipboard.writeText(read(READ_KEY))}>复制</button></div>
-                  <div><span>回复钥匙</span><code>{mask(read(NOTE_KEY))}</code><button type="button" onClick={() => navigator.clipboard.writeText(read(NOTE_KEY))}>复制</button></div>
-                </div><small>酒馆、日记和时光之轮共同使用这一套 API 与钥匙。主钥匙可恢复全部数据，请勿公开。</small>`,
+                  <div><span>涓婚挜鍖?/span><code>{mask(ownerKey)}</code>{ownerKey ? <button type="button" onClick={copyKey}>澶嶅埗</button> : null}</div>
+                  <div><span>璇诲彇閽ュ寵</span><code>{mask(read(READ_KEY))}</code><button type="button" onClick={() => navigator.clipboard.writeText(read(READ_KEY))}>澶嶅埗</button></div>
+                  <div><span>鍥炲閽ュ寵</span><code>{mask(read(NOTE_KEY))}</code><button type="button" onClick={() => navigator.clipboard.writeText(read(NOTE_KEY))}>澶嶅埗</button></div>
+                </div><small>閰掗銆佹棩璁板拰鏃跺厜涔嬭疆鍏卞悓浣跨敤杩欎竴濂?API 涓庨挜鍖欍€備富閽ュ寵鍙仮澶嶅叏閮ㄦ暟鎹紝璇峰嬁鍏紑銆?/small>`,
 );
 
 if (!styles.includes("CRIMSON_CLOUD_CONTROL_CENTER_V2")) {
@@ -159,3 +164,4 @@ if (!styles.includes("CRIMSON_CLOUD_CONTROL_CENTER_V2")) {
 fs.writeFileSync(componentPath, source);
 fs.writeFileSync(stylePath, styles);
 console.log("Applied Crimson Cloud Control Center v2 upgrade.");
+
