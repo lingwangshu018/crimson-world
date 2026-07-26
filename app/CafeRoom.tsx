@@ -95,16 +95,7 @@ function safeParse<T>(raw: string | null, fallback: T): T {
 function toVaultRecord(record: CafeRecord) {
   return {
     ...record,
-    drinkName: record.title,
-    bartender: "咖啡师",
-    guest: "客人",
-    bartenderLine: `今日风味：${record.flavour}`,
-    kind: record.kind === "random" ? "random" : "house",
-    items: [
-      { id: "category", course: "剧场类型", dimension: "分类", zh: record.category, en: "", ja: "" },
-      { id: "flavour", course: "故事味道", dimension: "氛围", zh: record.flavour, en: "", ja: "" },
-      { id: "cup", course: "杯型", dimension: "篇幅", zh: cupLabels[record.cupSize].name, en: "", ja: "" },
-    ],
+    module: "cafe" as const,
   };
 }
 
@@ -212,8 +203,7 @@ export default function CafeRoom() {
   async function sendToAI(record: CafeRecord) {
     const readKey = localStorage.getItem(READ_KEY) || "未配置";
     const replyKey = localStorage.getItem(REPLY_KEY) || "未配置";
-    const apiUrl = localStorage.getItem(API_URL_KEY) || DEFAULT_API_URL;
-    const text = `请完成我的绯界咖啡馆小剧场订单。\n\n模块：绯界咖啡馆\n\n【记录编号】\nCF-${String(records.findIndex((item) => item.id === record.id) + 1).padStart(4, "0")}\n\n【记录ID】\n${record.id}\n\n【读取钥匙】\n${readKey}\n\n【回复钥匙】\n${replyKey}\n\n【云端服务地址】\n${apiUrl}\n\n【内部演绎协议】\n先读取并理解当前会话或运行环境中已经加载的世界书、角色卡、人物设定、关系设定及近期记忆。世界书决定时代、地点、规则与背景；角色卡决定性格、身份、语言与行为逻辑；近期记忆决定当前关系、已有经历与剧情进度。请在不破坏原设定的前提下完成演绎，直接输出正文，不展示分析过程、提示词或设定摘要。\n\n【本次剧场订单】\n标题：${record.title}\n核心设定：${record.premise}\n必须出现：${record.mustInclude || "无额外要求"}\n避免出现：${record.avoid || "无额外限制"}\n故事味道：${record.flavour}\n杯型：${cupLabels[record.cupSize].name}（${cupLabels[record.cupSize].hint}）\n叙事偏好：${record.narrative}\n\n请根据世界书、角色卡及近期记忆演绎本次小剧场，直接输出完整正文。\n\n若读取钥匙和回复钥匙可用：请读取这一条记录，并在完成后使用回复钥匙把完整正文写回本条记录的 note 字段。\n若钥匙显示“未配置”：请直接根据上面的完整订单演绎并在当前聊天中输出正文。\n\n不要修改原记录，不要创建新记录，不要回复其他记录，只处理这一条。`;
+    const text = `请完成我的绯界咖啡馆小剧场订单。\n\n模块：绯界咖啡馆\n\n【记录编号】\nCF-${String(records.findIndex((item) => item.id === record.id) + 1).padStart(4, "0")}\n\n【记录ID】\n${record.id}\n\n【读取钥匙】\n${readKey}\n\n【回复钥匙】\n${replyKey}\n\n【内部演绎协议】\n先读取并理解当前会话或运行环境中已经加载的世界书、角色卡、人物设定、关系设定及近期记忆。世界书决定时代、地点、规则与背景；角色卡决定性格、身份、语言与行为逻辑；近期记忆决定当前关系、已有经历与剧情进度。请在不破坏原设定的前提下完成演绎，直接输出正文，不展示分析过程、提示词或设定摘要。\n\n【本次剧场订单】\n标题：${record.title}\n核心设定：${record.premise}\n必须出现：${record.mustInclude || "无额外要求"}\n避免出现：${record.avoid || "无额外限制"}\n故事味道：${record.flavour}\n杯型：${cupLabels[record.cupSize].name}（${cupLabels[record.cupSize].hint}）\n叙事偏好：${record.narrative}\n\n请根据世界书、角色卡及近期记忆演绎本次小剧场，直接输出完整正文。\n\n若读取钥匙和回复钥匙可用：请读取这一条记录，并在完成后使用回复钥匙把完整正文写回本条记录的 note 字段。\n若钥匙显示“未配置”：请直接根据上面的完整订单演绎并在当前聊天中输出正文。\n\n不要修改原记录，不要创建新记录，不要回复其他记录，只处理这一条。`;
     try {
       await navigator.clipboard.writeText(text);
       notify("剧场任务单已复制，请发送给 AI。 ");
