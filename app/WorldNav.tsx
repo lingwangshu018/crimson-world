@@ -18,7 +18,7 @@ const sidebarNames: Record<RoomId, string> = {
 
 export function WorldNav() {
   const [open, setOpen] = useState(false);
-  const [mapOpen, setMapOpen] = useState(false);
+  const [mapOpen, setMapOpen] = useState(true);
   const [active, setActive] = useState<RoomId>("tavern");
   const [previousActive, setPreviousActive] = useState<RoomId | null>(null);
 
