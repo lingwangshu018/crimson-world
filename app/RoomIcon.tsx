@@ -2,6 +2,8 @@ import type { RoomId } from "./room-registry";
 
 type RoomIconProps = {
   roomId: RoomId;
+  size?: number;
+  variant?: "map" | "sidebar";
 };
 
 const roomIconMap: Partial<Record<RoomId, string>> = {
@@ -12,18 +14,19 @@ const roomIconMap: Partial<Record<RoomId, string>> = {
   study: "/assets/map-icons/study-rooms.png",
 };
 
-export function RoomIcon({ roomId }: RoomIconProps) {
+export function RoomIcon({ roomId, size, variant = "map" }: RoomIconProps) {
   const src = roomIconMap[roomId] ?? "/assets/map-icons/unknown.png";
+  const iconSize = size ?? (variant === "sidebar" ? 48 : 88);
 
   return (
     <img
       src={src}
       alt=""
       aria-hidden="true"
-      className="world-map-room-icon"
+      className={`world-map-room-icon icon-${variant}`}
       style={{
-        width: "88px",
-        height: "88px",
+        width: `${iconSize}px`,
+        height: `${iconSize}px`,
         objectFit: "contain",
       }}
     />
