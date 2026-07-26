@@ -4,8 +4,13 @@ const navPath = new URL("../app/WorldNav.tsx", import.meta.url);
 let nav = fs.readFileSync(navPath, "utf8");
 let changed = false;
 
+const outletPath = new URL("../app/WorldRoomOutlet.tsx", import.meta.url);
+const outlet = fs.existsSync(outletPath) ? fs.readFileSync(outletPath, "utf8") : "";
+const outletIntegrated = outlet.includes('import { TimeWheelRoom } from "./TimeWheelRoom";') && /wheel\s*:\s*TimeWheelRoom/.test(outlet);
+if (outletIntegrated) console.log("Time Wheel room already integrated through WorldRoomOutlet.");
+
 const importLine = 'import { TimeWheelRoom } from "./TimeWheelRoom";';
-if (!nav.includes(importLine)) {
+if (!outletIntegrated && !nav.includes(importLine)) {
   const journalImport = 'import { JournalRoom } from "./JournalRoom";';
   if (!nav.includes(journalImport)) {
     console.warn("Skipped Time Wheel import: JournalRoom import anchor was not found.");
@@ -16,7 +21,7 @@ if (!nav.includes(importLine)) {
 }
 
 const renderLine = '<TimeWheelRoom onClose={() => selectSpace(spaces[0])} />';
-if (!nav.includes(renderLine)) {
+if (!outletIntegrated && !nav.includes(renderLine)) {
   const journalBranch = /(\{active === "journal" \? \(\s*<JournalRoom onClose=\{\(\) => selectSpace\(spaces\[0\]\)\} \/>\s*\) : )(active !== "tavern" \? \()/m;
   if (!journalBranch.test(nav)) {
     console.warn("Skipped Time Wheel render integration: navigation branch anchor was not found.");
@@ -67,7 +72,7 @@ if (!wheel.includes(titleMarker)) {
   console.log("Applied centered Crimson Time Wheel title.");
 }
 
-const complete = nav.includes(importLine) && nav.includes(renderLine);
+const complete = outletIntegrated || (nav.includes(importLine) && nav.includes(renderLine));
 if (complete) {
   console.log(changed ? "Applied embedded Time Wheel room." : "Time Wheel room already integrated; skipped.");
 } else {
