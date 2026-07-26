@@ -42,6 +42,35 @@ export function WorldNav() {
   }, [open]);
 
   useEffect(() => {
+    const shell = document.querySelector<HTMLElement>(".site-shell");
+    if (!shell) return;
+
+    shell.dataset.activeRoom = active;
+    const worldSelectors = [
+      ".world-trigger",
+      ".world-backdrop",
+      ".world-drawer",
+      ".world-map-shell",
+      ".world-active-room",
+    ].join(",");
+
+    Array.from(shell.children).forEach((child) => {
+      if (!(child instanceof HTMLElement)) return;
+      const belongsToWorldNavigation = child.matches(worldSelectors);
+      child.hidden = active === "tavern" ? child.classList.contains("world-active-room") : !belongsToWorldNavigation;
+    });
+
+    window.scrollTo({ top: 0, behavior: "auto" });
+
+    return () => {
+      delete shell.dataset.activeRoom;
+      Array.from(shell.children).forEach((child) => {
+        if (child instanceof HTMLElement) child.hidden = false;
+      });
+    };
+  }, [active]);
+
+  useEffect(() => {
     const cloudWords = /保存到\s*cloud|save\s*to\s*cloud|cloud\s*save|云端存档|保存到云端/i;
     function removeOriginalCloudControl() {
       const candidates = Array.from(document.querySelectorAll<HTMLElement>("button, a, [role='button']"));
@@ -158,7 +187,9 @@ export function WorldNav() {
       </aside>
 
       <WorldMap open={mapOpen} active={active} onClose={() => setMapOpen(false)} onSelect={selectSpace} />
-      <WorldRoomOutlet active={active} onClose={returnToPrevious} />
+      <div className="world-active-room">
+        <WorldRoomOutlet active={active} onClose={returnToPrevious} />
+      </div>
     </>
   );
 }
