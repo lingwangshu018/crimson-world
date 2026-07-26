@@ -26,13 +26,13 @@ source += `
 /* Reading view: lift only the text, leaving the ruled-paper background fixed. */
 .journal-read-content {
   position: relative;
-  top: -4px;
+  top: -6px;
 }
 
 /* AI reply text uses the same baseline correction without moving its card. */
 .journal-read-sheet aside p {
   position: relative;
-  top: -4px;
+  top: -6px;
 }
 
 @media (max-width: 600px) {
@@ -43,7 +43,7 @@ source += `
   }
   .journal-read-content,
   .journal-read-sheet aside p {
-    top: -4px;
+    top: -6px;
   }
 }
 `;
