@@ -37,6 +37,7 @@ const patches = [
   { file: "apply-direct-reply-collection.mjs", label: "direct tavern and time wheel reply collection" },
   { file: "apply-time-wheel-html-ai-workflow.mjs", label: "time wheel HTML template AI workflow" },
   { file: "apply-time-wheel-html-write-guard.mjs", label: "time wheel HTML reply validation" },
+  { file: "apply-cafe-room.mjs", label: "standalone Crimson Cafe room" },
   { file: "apply-study-room.mjs", label: "study rooms" },
 ];
 
