@@ -31,7 +31,7 @@ if (!styles.includes(styleMarker)) {
 }
 .journal-read-text {
   position: relative;
-  transform: translateY(-9px);
+  transform: translateY(-11px);
   white-space: pre-wrap;
   line-height: inherit;
 }
@@ -51,15 +51,15 @@ if (!styles.includes(styleMarker)) {
 .journal-read-sheet aside p {
   position: relative;
   top: auto !important;
-  transform: translateY(-6px);
+  transform: translateY(-8px);
 }
 
 @media (max-width: 600px) {
   .journal-read-text {
-    transform: translateY(-9px);
+    transform: translateY(-11px);
   }
   .journal-read-sheet aside p {
-    transform: translateY(-6px);
+    transform: translateY(-8px);
   }
 }
 `;
