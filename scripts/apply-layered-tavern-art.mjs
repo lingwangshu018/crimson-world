@@ -8,8 +8,19 @@ if (source.includes("tavern-background-art")) {
   process.exit(0);
 }
 
-const target = '<div className={`tavern-scene ${mixing ? "mixing" : ""}`}>\n';
-const replacement = `${target}            <img\n              className="tavern-background-art"\n              src={\`${'${import.meta.env.BASE_URL}'}assets/tavern-bg.webp\`}\n              alt=""\n              aria-hidden="true"\n            />\n            <img\n              className="tavern-bartender-art"\n              src={\`${'${import.meta.env.BASE_URL}'}assets/bartender-bg.webp\`}\n              alt=""\n              aria-hidden="true"\n            />\n`;
+const target = '<div className={`tavern-scene ${mixing ? "mixing" : ""}`}>';
+const replacement = `${target}\n            <img
+              className="tavern-background-art"
+              src={\`${'${import.meta.env.BASE_URL}'}assets/tavern-bg.webp\`}
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              className="tavern-bartender-art"
+              src={\`${'${import.meta.env.BASE_URL}'}assets/bartender-bg.webp\`}
+              alt=""
+              aria-hidden="true"
+            />`;
 
 if (!source.includes(target)) {
   throw new Error("Tavern scene target not found.");
