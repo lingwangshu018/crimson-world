@@ -1,6 +1,7 @@
 "use client";
 
 import type { ComponentType } from "react";
+import CafeRoom from "./CafeRoom";
 import { JournalRoom } from "./JournalRoom";
 import { StudyRoom } from "./StudyRoom";
 import { TimeWheelRoom } from "./TimeWheelRoom";
@@ -11,6 +12,7 @@ type RoomComponentProps = {
 };
 
 const roomRenderers: Partial<Record<RoomRenderer, ComponentType<RoomComponentProps>>> = {
+  cafe: CafeRoom,
   journal: JournalRoom,
   wheel: TimeWheelRoom,
   study: StudyRoom,
