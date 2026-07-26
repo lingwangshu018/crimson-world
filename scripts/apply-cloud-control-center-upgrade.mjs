@@ -86,7 +86,7 @@ replace(
 replace(
   '      const records = Array.isArray(result.records) ? result.records : [];\n      const first = records[0] as { guest?: unknown; bartender?: unknown } | undefined;',
   `      const records = Array.isArray(result.records) ? result.records : [];
-      const tavernRecords = records.filter((item) => !(item as Record<string, unknown>).journal && !(item as Record<string, unknown>).timeWheel);
+      const tavernRecords = records.filter((item) => {\n        const record = item as Record<string, unknown>;\n        return !record.journal && !record.timeWheel && record.module !== "cafe" && !String(record.id || "").startsWith("cafe-");\n      });
       const first = tavernRecords[0] as { guest?: unknown; bartender?: unknown } | undefined;`,
 );
 
@@ -113,13 +113,13 @@ replace(
         const incomingJournal = Array.isArray(payload.journal?.diaries) ? payload.journal.diaries : [];
         const incomingFolders = Array.isArray(payload.journal?.folders) ? payload.journal.folders : [];
         const incomingTimeHistory = Array.isArray(payload.timeWheel?.history) ? payload.timeWheel.history : [];
-        const incomingTimeModules = Array.isArray(payload.timeWheel?.modules) ? payload.timeWheel.modules : [];
+        const incomingTimeModules = Array.isArray(payload.timeWheel?.modules) ? payload.timeWheel.modules : [];\n        const incomingCafe = Array.isArray(payload.cafe?.records) ? payload.cafe.records : [];
         write(HISTORY_KEY, JSON.stringify(replaceAll ? incomingTavern : mergeRecordsById(JSON.parse(read(HISTORY_KEY) || "[]"), incomingTavern)));
         write(SETTINGS_KEY, JSON.stringify({ ...JSON.parse(read(SETTINGS_KEY) || "{}"), ...(payload.tavern?.settings || {}) }));
         write(JOURNAL_KEY, JSON.stringify(replaceAll ? incomingJournal : mergeRecordsById(JSON.parse(read(JOURNAL_KEY) || "[]"), incomingJournal)));
         write(JOURNAL_FOLDER_KEY, JSON.stringify(replaceAll ? incomingFolders : mergeRecordsById(JSON.parse(read(JOURNAL_FOLDER_KEY) || "[]"), incomingFolders)));
         write(TIME_WHEEL_HISTORY_KEY, JSON.stringify(replaceAll ? incomingTimeHistory : mergeRecordsById(JSON.parse(read(TIME_WHEEL_HISTORY_KEY) || "[]"), incomingTimeHistory)));
-        write(TIME_WHEEL_MODULES_KEY, JSON.stringify(replaceAll ? incomingTimeModules : mergeRecordsById(JSON.parse(read(TIME_WHEEL_MODULES_KEY) || "[]"), incomingTimeModules)));`,
+        write(TIME_WHEEL_MODULES_KEY, JSON.stringify(replaceAll ? incomingTimeModules : mergeRecordsById(JSON.parse(read(TIME_WHEEL_MODULES_KEY) || "[]"), incomingTimeModules)));\n        write(CAFE_RECORDS_KEY, JSON.stringify(replaceAll ? incomingCafe : mergeRecordsById(JSON.parse(read(CAFE_RECORDS_KEY) || "[]"), incomingCafe)));`,
 );
 
 replace(
