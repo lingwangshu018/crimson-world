@@ -27,7 +27,7 @@ function getRecordsApiUrl(value: string) {
     const url = new URL(configured);
     if (!url.pathname.endsWith("/api/records")) {
       url.pathname = url.pathname.endsWith("/api/vault")
-        ? url.pathname.replace(/\/api\/vault$/, "/api/records")
+        ? url.pathname.slice(0, -"/api/vault".length) + "/api/records"
         : "/api/records";
     }
     url.search = "";
