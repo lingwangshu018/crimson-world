@@ -1,12 +1,13 @@
 export type CloudModuleId = "tavern" | "journal" | "wheel" | "cafe";
 
-export type CloudRecord = {
+type CloudRecordBase = {
   id: string;
   module?: string;
   note?: string;
   noteUpdatedAt?: string | null;
-  [key: string]: unknown;
 };
+
+export type CloudRecord = CloudRecordBase & Record<string, unknown>;
 
 type CloudConfig = {
   apiUrl: string;
@@ -34,10 +35,7 @@ const KEY_PATTERN = /^ctv1_[A-Za-z0-9_-]{43}$/;
 export class CloudCoreError extends Error {
   code: "NOT_CONFIGURED" | "READ_FAILED" | "SYNC_FAILED";
 
-  constructor(
-    code: CloudCoreError["code"],
-    message: string,
-  ) {
+  constructor(code: CloudCoreError["code"], message: string) {
     super(message);
     this.name = "CloudCoreError";
     this.code = code;
@@ -68,9 +66,20 @@ function belongsToModule(record: CloudRecord, moduleId: CloudModuleId) {
   if (record.module === moduleId) return true;
   const id = String(record.id || "");
   if (moduleId === "cafe") return id.startsWith("cafe-");
-  if (moduleId === "journal") return id.startsWith("journal-") || id.startsWith("jr-");
-  if (moduleId === "wheel") return id.startsWith("wheel-") || id.startsWith("tw-");
-  return !record.module && !id.startsWith("cafe-") && !id.startsWith("journal-") && !id.startsWith("jr-") && !id.startsWith("wheel-") && !id.startsWith("tw-");
+  if (moduleId === "journal") {
+    return id.startsWith("journal-") || id.startsWith("jr-");
+  }
+  if (moduleId === "wheel") {
+    return id.startsWith("wheel-") || id.startsWith("tw-");
+  }
+  return (
+    !record.module &&
+    !id.startsWith("cafe-") &&
+    !id.startsWith("journal-") &&
+    !id.startsWith("jr-") &&
+    !id.startsWith("wheel-") &&
+    !id.startsWith("tw-")
+  );
 }
 
 async function readVault(config: CloudConfig): Promise<VaultResponse> {
@@ -91,19 +100,19 @@ async function readVault(config: CloudConfig): Promise<VaultResponse> {
   return result;
 }
 
-export async function syncModuleRecords(
+export async function syncModuleRecords<T extends CloudRecordBase>(
   moduleId: CloudModuleId,
-  moduleRecords: CloudRecord[],
+  moduleRecords: T[],
 ): Promise<{ syncedAt: string | null; recordCount: number }> {
   const config = getCloudConfig();
   const existing = await readVault(config);
   const preserved = (existing.records || []).filter(
     (record) => !belongsToModule(record, moduleId),
   );
-  const normalized = moduleRecords.map((record) => ({
+  const normalized: CloudRecord[] = moduleRecords.map((record) => ({
     ...record,
     module: moduleId,
-  }));
+  })) as CloudRecord[];
 
   const response = await fetch(config.apiUrl, {
     method: "PUT",
@@ -132,7 +141,7 @@ export async function syncModuleRecords(
   };
 }
 
-export async function collectModuleNotes<T extends CloudRecord>(
+export async function collectModuleNotes<T extends CloudRecordBase>(
   moduleId: CloudModuleId,
   localRecords: T[],
 ): Promise<{ records: T[]; updatedCount: number }> {
@@ -164,7 +173,7 @@ export async function collectModuleNotes<T extends CloudRecord>(
         ...record,
         note: cloudNote,
         noteUpdatedAt: cloudTime,
-      };
+      } as T;
     }
     return record;
   });
