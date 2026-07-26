@@ -13,11 +13,7 @@ const roomIconMap: Partial<Record<RoomId, string>> = {
 };
 
 export function RoomIcon({ roomId }: RoomIconProps) {
-  const src = roomIconMap[roomId];
-
-  if (!src) {
-    return <span aria-hidden="true">✦</span>;
-  }
+  const src = roomIconMap[roomId] ?? "/assets/map-icons/unknown.png";
 
   return (
     <img
