@@ -139,7 +139,11 @@ export function WorldMap({ open, active, onClose, onSelect, onOpenCloud }: World
               aria-label={isCore ? `绯界核心，${coreSubtitle}` : `${node.name}，${unlocked ? node.subtitle : node.unlock?.label || "布置中"}`}
             >
               <span className="world-map-building">
-                {node.roomId ? <RoomIcon roomId={node.roomId} /> : node.icon}
+                {node.roomId ? <RoomIcon roomId={node.roomId} /> : node.kind === "core" ? (
+                  <img src="/assets/map-icons/core-memory.png" alt="" aria-hidden="true" className="world-map-special-icon" />
+                ) : (
+                  <img src="/assets/map-icons/unknown.png" alt="" aria-hidden="true" className="world-map-special-icon" />
+                )}
               </span>
               <span className="world-map-label">
                 <strong>{unlocked ? node.name : "未知领域"}</strong>
