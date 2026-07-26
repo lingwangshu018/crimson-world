@@ -25,6 +25,11 @@ export function RoomIcon({ roomId }: RoomIconProps) {
       alt=""
       aria-hidden="true"
       className="world-map-room-icon"
+      style={{
+        width: "88px",
+        height: "88px",
+        objectFit: "contain",
+      }}
     />
   );
 }
