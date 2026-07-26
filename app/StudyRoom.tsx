@@ -31,7 +31,7 @@ function formatTime(seconds: number) {
   return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
 }
 
-export function StudyRoom({ onClose }: StudyRoomProps) {
+export function StudyRoom(_props: StudyRoomProps) {
   const [theme, setTheme] = useState<RoomTheme | null>(null);
   const [phase, setPhase] = useState<Phase>("focus");
   const [focusMinutes, setFocusMinutes] = useState(25);
@@ -125,12 +125,12 @@ export function StudyRoom({ onClose }: StudyRoomProps) {
   return (
     <section className={`study-room study-room-active theme-${theme}`} aria-label={copy.title}>
       <header className="study-toolbar">
-        <button type="button" onClick={() => setTheme(null)}>← 切换自习室</button>
+        <span aria-hidden="true" />
         <div>
           <span>{copy.eyebrow}</span>
           <strong>{copy.title}</strong>
         </div>
-        <button type="button" onClick={onClose}>返回酒馆</button>
+        <button type="button" onClick={() => setTheme(null)}>← 切换自习室</button>
       </header>
 
       <main className="study-desk">
