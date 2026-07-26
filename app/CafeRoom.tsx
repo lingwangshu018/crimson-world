@@ -362,7 +362,7 @@ export default function CafeRoom() {
     if (!owner) { notify("请先同步一次咖啡馆订单，再收取 AI 新手记。 "); return; }
     setPulling(true);
     try {
-      const apiUrl = localStorage.getItem(API_URL_KEY) || DEFAULT_API_URL;
+      const apiUrl = getRecordsApiUrl();
       const response = await fetch(`${apiUrl}?limit=500`, { headers: { Authorization: `Bearer ${owner}`, Accept: "application/json" } });
       const result = await response.json() as { records?: Array<Record<string, unknown>> };
       if (!response.ok) throw new Error("收取失败");
