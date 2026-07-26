@@ -278,7 +278,7 @@ export default function CafeRoom() {
       className="cafe-room"
       style={{
         backgroundImage:
-          'linear-gradient(180deg, rgba(247,240,229,.64), rgba(239,226,208,.82)), url("images/crimson-cafe-background.webp")',
+          'linear-gradient(180deg, rgba(18,7,10,.12), rgba(18,7,10,.28)), url("images/crimson-cafe-background.webp")',
         backgroundPosition: "center top",
         backgroundSize: "cover",
         backgroundAttachment: "fixed",
