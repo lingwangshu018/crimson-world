@@ -147,7 +147,7 @@
 }
 
 .world-map-home .world-map-node.is-core {
-  pointer-events: none;
+  cursor: pointer;
 }
 
 .world-map-home .world-map-node.is-core .world-map-building {
@@ -157,6 +157,40 @@
   font-size: 30px;
   background: radial-gradient(circle, rgba(215,184,117,.32), rgba(88,19,34,.68) 46%, rgba(16,6,10,.96));
   animation: world-heart 3.6s ease-in-out infinite;
+}
+
+.world-map-home .world-map-node.is-core:hover .world-map-building,
+.world-map-home .world-map-node.is-core:focus-visible .world-map-building {
+  border-color: var(--map-gold);
+  box-shadow: 0 0 54px rgba(215,184,117,.32), inset 0 0 22px rgba(255,255,255,.06);
+}
+
+.world-map-home .world-core-status {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  margin-top: 6px;
+  color: var(--faint);
+  font-size: 8px;
+  letter-spacing: .1em;
+}
+
+.world-map-home .world-core-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #72515b;
+  box-shadow: 0 0 8px rgba(114,81,91,.45);
+}
+
+.world-map-home .world-core-status.is-ready { color: #d9c58c; }
+.world-map-home .world-core-status.is-ready i {
+  background: #c8b56f;
+  box-shadow: 0 0 12px rgba(200,181,111,.8);
+}
+.world-map-home .world-core-status.is-partial i {
+  background: #a76d43;
+  box-shadow: 0 0 10px rgba(167,109,67,.7);
 }
 
 .world-map-home .world-map-node.is-mystery .world-map-building {
