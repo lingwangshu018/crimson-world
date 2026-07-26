@@ -16,6 +16,27 @@ const API_URL_KEY = "crimson-world.vault-api-url.v1";
 const TIME_WHEEL_HISTORY_KEY = "public_tm_history_v2";
 const TIME_WHEEL_MODULES_KEY = "public_tm_modules_v2";
 const CAFE_RECORDS_KEY = "crimson-cafe.records.v1";
+const CAFE_RECIPES_KEY = "crimson-cafe.recipes.v1";
+
+function getRecordsApiUrl(value: string) {
+  const configured = value.trim();
+  if (!configured) {
+    return "https://crimson-world.lingwangshu018.workers.dev/api/records";
+  }
+  try {
+    const url = new URL(configured);
+    if (!url.pathname.endsWith("/api/records")) {
+      url.pathname = url.pathname.endsWith("/api/vault")
+        ? url.pathname.replace(/\/api\/vault$/, "/api/records")
+        : "/api/records";
+    }
+    url.search = "";
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return "https://crimson-world.lingwangshu018.workers.dev/api/records";
+  }
+}
 
 // CRIMSON_UNIFIED_CLOUD_ARCHIVE`,
 );
@@ -108,7 +129,7 @@ replace(
       tavern: { history: JSON.parse(read(HISTORY_KEY) || "[]"), settings: JSON.parse(read(SETTINGS_KEY) || "{}") },
       journal: { diaries: JSON.parse(read(JOURNAL_KEY) || "[]"), folders: JSON.parse(read(JOURNAL_FOLDER_KEY) || "[]") },
       timeWheel: { history: JSON.parse(read(TIME_WHEEL_HISTORY_KEY) || "[]"), modules: JSON.parse(read(TIME_WHEEL_MODULES_KEY) || "[]") },
-      cafe: { records: JSON.parse(read(CAFE_RECORDS_KEY) || "[]") },
+      cafe: { records: JSON.parse(read(CAFE_RECORDS_KEY) || "[]"), recipes: JSON.parse(read(CAFE_RECIPES_KEY) || "[]") },
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -137,6 +158,7 @@ replace(
         write(TIME_WHEEL_HISTORY_KEY, JSON.stringify(payload.timeWheel?.history || []));
         write(TIME_WHEEL_MODULES_KEY, JSON.stringify(payload.timeWheel?.modules || []));
         write(CAFE_RECORDS_KEY, JSON.stringify(payload.cafe?.records || []));
+        write(CAFE_RECIPES_KEY, JSON.stringify(payload.cafe?.recipes || []));
         setMessage("全部项目已导入，页面即将刷新。✨");
         window.setTimeout(() => window.location.reload(), 900);
       } catch (error) { setMessage(error instanceof Error ? error.message : "导入失败"); }
@@ -149,17 +171,21 @@ replace(
     if (!KEY_PATTERN.test(key)) return setMessage("请先完成一次全部同步。");
     setMessage("正在收取所有项目的 AI 回复……");
     try {
-      const response = await fetch(\`${'${apiUrl}'}?limit=500\`, { headers: { Authorization: \`Bearer ${'${key}'}\`, Accept: "application/json" } });
+      const recordsApiUrl = getRecordsApiUrl(apiUrl);
+      const response = await fetch(\`${'${recordsApiUrl}'}?limit=500\`, { headers: { Authorization: \`Bearer ${'${key}'}\`, Accept: "application/json" } });
       const result = await response.json() as { error?: string; records?: Array<Record<string, any>> };
       if (!response.ok) throw new Error(result.error || "收取失败");
       const cloud = new Map((result.records || []).map((item) => [String(item.id), item]));
+      const tavern = JSON.parse(read(HISTORY_KEY) || "[]") as Array<Record<string, any>>;
       const journal = JSON.parse(read(JOURNAL_KEY) || "[]") as Array<Record<string, any>>;
       const timeWheel = JSON.parse(read(TIME_WHEEL_HISTORY_KEY) || "[]") as Array<Record<string, any>>;
       const cafe = JSON.parse(read(CAFE_RECORDS_KEY) || "[]") as Array<Record<string, any>>;
       let count = 0;
+      const nextTavern = tavern.map((item) => { const remote = cloud.get(String(item.id)); if (remote?.note && remote.note !== item.note) { count += 1; return { ...item, note: remote.note, noteUpdatedAt: remote.noteUpdatedAt || new Date().toISOString() }; } return item; });
       const nextJournal = journal.map((item) => { const remote = cloud.get(String(item.id)); if (remote?.note && remote.note !== item.reply) { count += 1; return { ...item, reply: remote.note, replyAt: remote.noteUpdatedAt ? new Date(remote.noteUpdatedAt).getTime() : Date.now() }; } return item; });
       const nextTimeWheel = timeWheel.map((item) => { const remote = cloud.get(String(item.id)); if (remote?.note && remote.note !== item.ai_reply) { count += 1; return { ...item, ai_reply: remote.note, ai_reply_at: remote.noteUpdatedAt ? new Date(remote.noteUpdatedAt).getTime() : Date.now() }; } return item; });
       const nextCafe = cafe.map((item) => { const remote = cloud.get(String(item.id)); if (remote?.module === "cafe" && remote.note && remote.note !== item.note) { count += 1; return { ...item, note: remote.note, noteUpdatedAt: remote.noteUpdatedAt || new Date().toISOString() }; } return item; });
+      write(HISTORY_KEY, JSON.stringify(nextTavern));
       write(JOURNAL_KEY, JSON.stringify(nextJournal));
       write(TIME_WHEEL_HISTORY_KEY, JSON.stringify(nextTimeWheel));
       write(CAFE_RECORDS_KEY, JSON.stringify(nextCafe));

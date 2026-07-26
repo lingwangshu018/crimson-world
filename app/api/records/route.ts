@@ -210,7 +210,7 @@ export async function GET(request: Request) {
       10,
     );
     const limit = Number.isFinite(requestedLimit)
-      ? Math.min(50, Math.max(1, requestedLimit))
+      ? Math.min(MAX_RECORDS, Math.max(1, requestedLimit))
       : 25;
 
     let records = payload.records;
