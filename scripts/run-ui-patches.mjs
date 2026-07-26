@@ -39,7 +39,6 @@ const patches = [
   { file: "apply-time-wheel-html-write-guard.mjs", label: "time wheel HTML reply validation" },
   { file: "apply-cafe-room.mjs", label: "standalone Crimson Cafe room" },
   { file: "apply-strict-room-isolation.mjs", label: "strict room isolation" },
-  { file: "apply-study-room.mjs", label: "study rooms" },
 ];
 
 console.log("\nCrimson World UI patch pipeline\n");
