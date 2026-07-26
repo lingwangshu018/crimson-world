@@ -88,7 +88,7 @@ export function WorldMap({ open, active, onClose, onSelect, onOpenCloud }: World
       <div className="world-map-head">
         <div className="world-map-title">
           <p>CRIMSON WORLD ATLAS</p>
-          <h1>绯界 · 世界卷轴</h1>
+          <h1>卷轴</h1>
           <span>所有故事发生过的地方，都会在这里留下坐标。</span>
         </div>
         <button className="world-map-enter-current" type="button" onClick={onClose}>
