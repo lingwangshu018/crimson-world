@@ -90,7 +90,6 @@ export function StudyRoom({ onClose }: StudyRoomProps) {
   if (!theme) {
     return (
       <section className="study-room study-room-lobby" aria-label="自习室选择">
-        <button className="study-room-back" type="button" onClick={onClose}>← 返回绯夜酒馆</button>
         <div className="study-lobby-glow" />
         <header className="study-lobby-head">
           <span>CRIMSON WORLD · ROOM 05</span>
