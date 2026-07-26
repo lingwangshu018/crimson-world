@@ -41,8 +41,8 @@ export const roomRegistry = [
   {
     id: "journal",
     icon: "书",
-    name: "绯界图书馆",
-    english: "CRIMSON LIBRARY",
+    name: "日记本",
+    english: "PRIVATE JOURNAL",
     description: "这里收藏着每一天，也收藏未曾说完的心事",
     status: "ready",
     renderer: "journal",
