@@ -223,7 +223,12 @@ export default function CafeRoom() {
       const apiUrl = localStorage.getItem(API_URL_KEY) || DEFAULT_API_URL;
       const existingResponse = await fetch(`${apiUrl}?limit=500`, { headers: { Authorization: `Bearer ${owner}`, Accept: "application/json" } });
       const existing = existingResponse.ok ? await existingResponse.json() as { records?: unknown[] } : { records: [] };
-      const otherRecords = (existing.records || []).filter((item) => !(item && typeof item === "object" && (String((item as { id?: string }).id || "").startsWith("cafe-") || (item as { module?: string }).module === "cafe")));
+      const otherRecords = (existing.records || []).filter((item) => {
+        if (!item || typeof item !== "object") return true;
+        const cloudRecord = item as { id?: string; module?: string };
+        if (cloudRecord.module) return cloudRecord.module !== "cafe";
+        return !String(cloudRecord.id || "").startsWith("cafe-");
+      });
       const response = await fetch(apiUrl, {
         method: "PUT",
         headers: { Authorization: `Bearer ${owner}`, "Content-Type": "application/json" },
@@ -249,7 +254,8 @@ export default function CafeRoom() {
       let count = 0;
       const next = records.map((record) => {
         const cloud = byId.get(record.id);
-        const cloudNote = typeof cloud?.note === "string" ? cloud.note : "";
+        if (cloud?.module !== "cafe") return record;
+        const cloudNote = typeof cloud.note === "string" ? cloud.note : "";
         const cloudTime = typeof cloud?.noteUpdatedAt === "string" ? cloud.noteUpdatedAt : null;
         if (cloudNote && cloudNote !== record.note && new Date(cloudTime || 0).getTime() >= new Date(record.noteUpdatedAt || 0).getTime()) {
           count += 1; return { ...record, note: cloudNote, noteUpdatedAt: cloudTime };
