@@ -1,18 +1,42 @@
 import fs from "node:fs";
 
-const path = new URL("../app/journal-room.css", import.meta.url);
-let source = fs.readFileSync(path, "utf8");
-const marker = "CRIMSON_JOURNAL_LINE_ALIGNMENT";
+const componentPath = new URL("../app/JournalRoom.tsx", import.meta.url);
+const stylePath = new URL("../app/journal-room.css", import.meta.url);
+let component = fs.readFileSync(componentPath, "utf8");
+let styles = fs.readFileSync(stylePath, "utf8");
 
-if (source.includes(marker)) {
-  console.log("Journal writing lines are already aligned.");
-  process.exit(0);
+const wrapperMarker = "CRIMSON_JOURNAL_READ_TEXT_WRAPPER";
+const styleMarker = "CRIMSON_JOURNAL_TEXT_BASELINE_V2";
+
+if (!component.includes(wrapperMarker)) {
+  const anchor = '<div className="journal-read-content">{current.content}</div>';
+  if (!component.includes(anchor)) {
+    throw new Error("Journal read-content anchor not found");
+  }
+
+  component = component.replace(
+    anchor,
+    `<div className="journal-read-content"><div className="journal-read-text">{current.content}</div></div>{/* ${wrapperMarker} */}`,
+  );
 }
 
-source += `
+if (!styles.includes(styleMarker)) {
+  styles += `
 
-/* ${marker} */
-/* Match the paper rhythm while keeping glyphs visibly above each rule. */
+/* ${styleMarker} */
+/* Keep the ruled-paper background fixed; move only the rendered glyphs. */
+.journal-read-content {
+  position: relative;
+  top: auto !important;
+}
+.journal-read-text {
+  position: relative;
+  transform: translateY(-9px);
+  white-space: pre-wrap;
+  line-height: inherit;
+}
+
+/* Preserve the editor rhythm without shifting its paper rules. */
 .journal-editor textarea {
   padding-top: 3px;
   line-height: 32px;
@@ -23,30 +47,24 @@ source += `
   background-position: 0 0;
 }
 
-/* Reading view: lift only the text, leaving the ruled-paper background fixed. */
-.journal-read-content {
-  position: relative;
-  top: -6px;
-}
-
-/* AI reply text uses the same baseline correction without moving its card. */
+/* Reply prose also moves independently from any ruled background. */
 .journal-read-sheet aside p {
   position: relative;
-  top: -6px;
+  top: auto !important;
+  transform: translateY(-6px);
 }
 
 @media (max-width: 600px) {
-  .journal-editor textarea {
-    padding-top: 3px;
-    line-height: 32px;
-    background-position: 0 0;
+  .journal-read-text {
+    transform: translateY(-9px);
   }
-  .journal-read-content,
   .journal-read-sheet aside p {
-    top: -6px;
+    transform: translateY(-6px);
   }
 }
 `;
+}
 
-fs.writeFileSync(path, source);
-console.log("Lifted Journal reading and reply text above ruled paper lines.");
+fs.writeFileSync(componentPath, component);
+fs.writeFileSync(stylePath, styles);
+console.log("Wrapped Journal reading text and aligned glyphs independently from ruled paper lines.");
