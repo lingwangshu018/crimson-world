@@ -6,23 +6,24 @@ let source = fs.readFileSync(path, "utf8");
 const marker = "CRIMSON_CLOUD_RECORDS_ENDPOINT_FIX";
 if (source.includes(marker)) process.exit(0);
 
-const before = `      const url = new URL(configured);
-    if (!url.pathname.endsWith("/api/records")) {`;
+const pattern = /(\s*)const url = new URL\(configured\);\n\1if \(!url\.pathname\.endsWith\("\/api\/records"\)\) \{/;
+const match = source.match(pattern);
 
-const after = `      const url = new URL(configured);
-    // CRIMSON_CLOUD_RECORDS_ENDPOINT_FIX
-    // The legacy vault host has no unified records endpoint. Route only that
-    // historical default to the Crimson World worker; custom providers keep
-    // using their own /api/records endpoint.
-    if (url.hostname === "crimson-tavern.boarder-72pound.chatgpt.site") {
-      return "https://crimson-world.lingwangshu018.workers.dev/api/records";
-    }
-    if (!url.pathname.endsWith("/api/records")) {`;
-
-if (!source.includes(before)) {
+if (!match) {
   throw new Error("Cloud records endpoint patch target not found");
 }
 
-source = source.replace(before, after);
+const indent = match[1];
+const replacement = `${indent}const url = new URL(configured);
+${indent}// CRIMSON_CLOUD_RECORDS_ENDPOINT_FIX
+${indent}// The legacy vault host has no unified records endpoint. Route only that
+${indent}// historical default to the Crimson World worker; custom providers keep
+${indent}// using their own /api/records endpoint.
+${indent}if (url.hostname === "crimson-tavern.boarder-72pound.chatgpt.site") {
+${indent}  return "https://crimson-world.lingwangshu018.workers.dev/api/records";
+${indent}}
+${indent}if (!url.pathname.endsWith("/api/records")) {`;
+
+source = source.replace(pattern, replacement);
 fs.writeFileSync(path, source);
 console.log("Fixed legacy full-sync records endpoint routing.");
