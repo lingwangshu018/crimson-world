@@ -22,6 +22,7 @@ type WorldMapProps = {
   active: RoomId;
   onClose: () => void;
   onSelect: (room: RoomDefinition) => void;
+  onOpenCloud: () => void;
 };
 
 const EMPTY_PROGRESS: WorldProgress = {
@@ -35,7 +36,7 @@ function isPlannedRoom(status: RoomStatus) {
   return status === "planned";
 }
 
-export function WorldMap({ open, active, onClose, onSelect }: WorldMapProps) {
+export function WorldMap({ open, active, onClose, onSelect, onOpenCloud }: WorldMapProps) {
   const rooms = getVisibleRooms();
   const roomById = useMemo(
     () => new Map<RoomId, RoomDefinition>(rooms.map((room) => [room.id, room] as const)),
@@ -43,12 +44,29 @@ export function WorldMap({ open, active, onClose, onSelect }: WorldMapProps) {
   );
   const [progress, setProgress] = useState<WorldProgress>(EMPTY_PROGRESS);
   const [entering, setEntering] = useState<string | null>(null);
+  const [cloudState, setCloudState] = useState<"ready" | "partial" | "empty">("empty");
 
   useEffect(() => {
-    if (open) setProgress(readWorldProgress());
+    if (!open) return;
+    setProgress(readWorldProgress());
+
+    try {
+      const owner = window.localStorage.getItem("crimson-tavern.vault-owner-key.v1") || "";
+      const readKey = window.localStorage.getItem("crimson-tavern.vault-read-key.v1") || "";
+      const replyKey = window.localStorage.getItem("crimson-tavern.vault-note-key.v1") || "";
+      const apiUrl = window.localStorage.getItem("crimson-world.vault-api-url.v1") || "";
+      const configured = [owner, readKey, replyKey, apiUrl].filter(Boolean).length;
+      setCloudState(configured === 4 ? "ready" : configured ? "partial" : "empty");
+    } catch {
+      setCloudState("empty");
+    }
   }, [open]);
 
   function enterNode(node: WorldMapNode) {
+    if (node.kind === "core") {
+      onOpenCloud();
+      return;
+    }
     if (!node.roomId || entering) return;
     const room = roomById.get(node.roomId);
     if (!room || isPlannedRoom(room.status) || !isWorldNodeUnlocked(node, progress)) return;
@@ -95,6 +113,12 @@ export function WorldMap({ open, active, onClose, onSelect }: WorldMapProps) {
           const unlocked = isWorldNodeUnlocked(node, progress) && !planned;
           const unlockProgress = worldUnlockProgress(node, progress);
           const activeNode = node.roomId === active;
+          const isCore = node.kind === "core";
+          const coreSubtitle = cloudState === "ready"
+            ? "云端已连接 · 打开控制中心"
+            : cloudState === "partial"
+              ? "云端配置未完成 · 点击继续"
+              : "点击配置绯界云端";
           const percentage = unlockProgress
             ? `${Math.round((unlockProgress.current / unlockProgress.target) * 100)}%`
             : "100%";
@@ -111,8 +135,8 @@ export function WorldMap({ open, active, onClose, onSelect }: WorldMapProps) {
               type="button"
               key={node.id}
               onClick={() => enterNode(node)}
-              disabled={!node.roomId || !unlocked || Boolean(entering)}
-              aria-label={`${node.name}，${unlocked ? node.subtitle : node.unlock?.label || "布置中"}`}
+              disabled={(!node.roomId && !isCore) || !unlocked || Boolean(entering)}
+              aria-label={isCore ? `绯界核心，${coreSubtitle}` : `${node.name}，${unlocked ? node.subtitle : node.unlock?.label || "布置中"}`}
             >
               <span className="world-map-building">
                 {node.roomId ? <RoomIcon roomId={node.roomId} /> : node.icon}
@@ -120,7 +144,8 @@ export function WorldMap({ open, active, onClose, onSelect }: WorldMapProps) {
               <span className="world-map-label">
                 <strong>{unlocked ? node.name : "未知领域"}</strong>
                 <em>{node.english}</em>
-                <small>{unlocked ? node.subtitle : node.unlock?.label || "布置中"}</small>
+                <small>{isCore ? coreSubtitle : unlocked ? node.subtitle : node.unlock?.label || "布置中"}</small>
+                {isCore ? <span className={`world-core-status is-${cloudState}`}><i />{cloudState === "ready" ? "已连接" : cloudState === "partial" ? "待完善" : "未配置"}</span> : null}
                 {unlockProgress ? (
                   <span className="world-map-progress" aria-label={`${unlockProgress.current}/${unlockProgress.target}`}>
                     <b>{unlockProgress.current}</b><i /><b>{unlockProgress.target}</b>

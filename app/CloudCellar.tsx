@@ -79,6 +79,18 @@ export function CloudCellar() {
   }, []);
 
   useEffect(() => {
+    function openFromWorldCore() {
+      setOwnerKey(read(OWNER_KEY));
+      setSyncedAt(read(SYNCED_AT_KEY));
+      setGuestName(read(GUEST_NAME_KEY) || "客人");
+      setOpen(true);
+    }
+
+    window.addEventListener("crimson:open-cloud-center", openFromWorldCore);
+    return () => window.removeEventListener("crimson:open-cloud-center", openFromWorldCore);
+  }, []);
+
+  useEffect(() => {
     function keepOnScreen() {
       setPosition((current) => current ? clampPosition(current) : clampPosition(defaultPosition()));
     }

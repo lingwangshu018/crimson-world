@@ -122,6 +122,13 @@ export function WorldNav() {
     setOpen(false);
     setMapOpen(true);
   };
+  const openCloudCore = () => {
+    setOpen(false);
+    setMapOpen(false);
+    window.setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("crimson:open-cloud-center"));
+    }, 0);
+  };
 
   return (
     <>
@@ -186,7 +193,7 @@ export function WorldNav() {
         <footer><span>PRIVATE DIGITAL WORLD</span><span>EST. 2026</span></footer>
       </aside>
 
-      <WorldMap open={mapOpen} active={active} onClose={() => setMapOpen(false)} onSelect={selectSpace} />
+      <WorldMap open={mapOpen} active={active} onClose={() => setMapOpen(false)} onSelect={selectSpace} onOpenCloud={openCloudCore} />
       <div className="world-active-room">
         <WorldRoomOutlet active={active} onClose={returnToPrevious} />
       </div>
