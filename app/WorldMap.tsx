@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { CrimsonCoreIcon } from "./CrimsonCoreIcon";
 import { RoomIcon } from "./RoomIcon";
 import { worldMapNodes, type WorldMapNode } from "./world-map-data";
 import {
@@ -140,7 +141,7 @@ export function WorldMap({ open, active, onClose, onSelect, onOpenCloud }: World
             >
               <span className="world-map-building">
                 {node.roomId ? <RoomIcon roomId={node.roomId} /> : node.kind === "core" ? (
-                  <img src="/assets/map-icons/core-memory.png" alt="" aria-hidden="true" className="world-map-special-icon" />
+                  <CrimsonCoreIcon />
                 ) : (
                   <img src="/assets/map-icons/unknown.png" alt="" aria-hidden="true" className="world-map-special-icon" />
                 )}
