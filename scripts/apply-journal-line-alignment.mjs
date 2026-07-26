@@ -7,23 +7,7 @@ let styles = fs.readFileSync(stylePath, "utf8");
 
 const wrapperMarker = "CRIMSON_JOURNAL_READ_TEXT_WRAPPER";
 const styleMarker = "CRIMSON_JOURNAL_TEXT_BASELINE_V2";
-
-if (!component.includes(wrapperMarker)) {
-  const anchor = '<div className="journal-read-content">{current.content}</div>';
-  if (!component.includes(anchor)) {
-    throw new Error("Journal read-content anchor not found");
-  }
-
-  component = component.replace(
-    anchor,
-    `<div className="journal-read-content"><div className="journal-read-text">{current.content}</div></div>{/* ${wrapperMarker} */}`,
-  );
-}
-
-if (!styles.includes(styleMarker)) {
-  styles += `
-
-/* ${styleMarker} */
+const styleBlock = `/* ${styleMarker} */
 /* Keep the ruled-paper background fixed; move only the rendered glyphs. */
 .journal-read-content {
   position: relative;
@@ -31,7 +15,7 @@ if (!styles.includes(styleMarker)) {
 }
 .journal-read-text {
   position: relative;
-  transform: translateY(-11px);
+  transform: translateY(-15px);
   white-space: pre-wrap;
   line-height: inherit;
 }
@@ -51,20 +35,40 @@ if (!styles.includes(styleMarker)) {
 .journal-read-sheet aside p {
   position: relative;
   top: auto !important;
-  transform: translateY(-8px);
+  transform: translateY(-10px);
 }
 
 @media (max-width: 600px) {
   .journal-read-text {
-    transform: translateY(-11px);
+    transform: translateY(-15px);
   }
   .journal-read-sheet aside p {
-    transform: translateY(-8px);
+    transform: translateY(-10px);
   }
+}`;
+
+if (!component.includes(wrapperMarker)) {
+  const anchor = '<div className="journal-read-content">{current.content}</div>';
+  if (!component.includes(anchor)) {
+    throw new Error("Journal read-content anchor not found");
+  }
+
+  component = component.replace(
+    anchor,
+    `<div className="journal-read-content"><div className="journal-read-text">{current.content}</div></div>{/* ${wrapperMarker} */}`,
+  );
 }
-`;
+
+const existingStyleBlock = new RegExp(
+  `/\\* ${styleMarker} \\*/[\\s\\S]*?(?=\\n/\\* [A-Z0-9_]+ \\*/|$)`,
+);
+
+if (existingStyleBlock.test(styles)) {
+  styles = styles.replace(existingStyleBlock, styleBlock);
+} else {
+  styles += `\n\n${styleBlock}\n`;
 }
 
 fs.writeFileSync(componentPath, component);
 fs.writeFileSync(stylePath, styles);
-console.log("Wrapped Journal reading text and aligned glyphs independently from ruled paper lines.");
+console.log("Forced Journal reading text to the corrected ruled-line baseline.");
