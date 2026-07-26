@@ -43,6 +43,8 @@ if (!cloud.includes("CRIMSON_CLOUD_KEY_CENTER")) {
     if (kind === "owner") { write(OWNER_KEY, value); setOwnerKey(value); }
     if (kind === "read") { write(READ_KEY, value); setReadKey(value); }
     if (kind === "reply") { write(NOTE_KEY, value); setReplyKey(value); }
+    write(KEYS_DIRTY_KEY, "1");
+    setKeySyncPending(true);
   }
 
   function regenerateCredential(kind: "owner" | "read" | "reply") {
@@ -98,7 +100,7 @@ if (!cloud.includes("CRIMSON_CLOUD_KEY_CENTER")) {
                   ))}
                 </div>
                 <button className="cloud-reset-keys" type="button" onClick={regenerateAllCredentials}>⚠️ 全部重新生成钥匙</button>
-                <small className="cloud-key-footnote">三把钥匙由当前设备生成并保存在浏览器中；变更后需要执行一次“全部同步”，云端权限才会更新。</small>
+                <small className={`cloud-key-footnote ${keySyncPending ? "is-pending" : ""}`}>{keySyncPending ? "⚠️ 新钥匙尚未同步，云端仍在使用上一套钥匙。请立即执行“全部同步”。" : "三把钥匙已经与最近一次云端同步保持一致。"}</small>
               </div>`;
 
   if (cloud.includes(oldAdvanced)) {
@@ -114,7 +116,7 @@ if (!cloud.includes("CRIMSON_CLOUD_KEY_CENTER")) {
 
 if (!css.includes("CRIMSON_CLOUD_KEY_CENTER")) {
   css += `
-/* CRIMSON_CLOUD_KEY_CENTER */
+/* CRIMSON_CLOUD_KEY_CENTER */\n.cloud-key-footnote.is-pending{color:#f0c77f;font-weight:700}
 .cloud-service-field{display:grid;gap:8px;font-size:12px;color:rgba(255,244,231,.72)}
 .cloud-service-field input{width:100%;box-sizing:border-box}
 .cloud-key-list{display:grid;gap:12px;margin-top:14px}
