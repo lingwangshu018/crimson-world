@@ -45,13 +45,13 @@ if (!wheel.includes(titleMarker)) {
   const titleStyles = `
 /* CRIMSON_TIME_WHEEL_TITLE */
 .header { position: sticky; min-height: 76px; justify-content: center; padding: 14px 68px; overflow: hidden; }
-.header-title { position: relative; z-index: 1; display: grid; min-width: 0; place-items: center; cursor: pointer; text-align: center; animation: crimson-title-reveal .45s ease both; }
+.header-title { position: absolute; z-index: 1; left: 50%; top: 50%; display: grid; min-width: 0; place-items: center; cursor: pointer; text-align: center; transform: translate(-50%, -50%); animation: crimson-title-reveal .45s ease both; }
 .header-title::before { position: absolute; z-index: -1; width: 78px; height: 78px; border: 1px solid rgba(173, 126, 65, .25); border-radius: 50%; content: ""; box-shadow: 0 0 20px rgba(173, 126, 65, .14), inset 0 0 18px rgba(173, 126, 65, .07); animation: crimson-time-halo 7s ease-in-out infinite; }
 .header-title strong { color: #4a3024; font-family: Georgia, 'Songti SC', 'STSong', serif; font-size: 19px; font-weight: 600; letter-spacing: .32em; text-indent: .32em; line-height: 1.15; white-space: nowrap; }
 .header-title span { width: 92px; height: 1px; margin-top: 9px; background: linear-gradient(90deg, transparent, rgba(173, 126, 65, .72), transparent); }
 .header .add-btn { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); }
 .header .add-btn:active { transform: translateY(-50%) scale(.85); }
-@keyframes crimson-title-reveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes crimson-title-reveal { from { opacity: 0; } to { opacity: 1; }
 @keyframes crimson-time-halo { 0%, 100% { opacity: .5; transform: scale(.94); } 50% { opacity: 1; transform: scale(1.04); } }
 @media (max-width: 480px) { .header { min-height: 72px; padding-right: 58px; padding-left: 58px; } .header-title strong { font-size: 18px; letter-spacing: .25em; text-indent: .25em; } .header-title::before { width: 70px; height: 70px; } }
 @media (prefers-reduced-motion: reduce) { .header-title, .header-title::before { animation: none; } }

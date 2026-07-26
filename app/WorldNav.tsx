@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CloudCellar } from "./CloudCellar";
 import { RoomIcon } from "./RoomIcon";
 import { WorldMap } from "./WorldMap";
 import { WorldRoomOutlet } from "./WorldRoomOutlet";
@@ -52,6 +53,10 @@ export function WorldNav() {
       ".world-drawer",
       ".world-map-shell",
       ".world-active-room",
+      ".cellar-orb",
+      ".assistive-scrim",
+      ".assistive-cloud-menu",
+      ".cellar-backdrop",
     ].join(",");
 
     Array.from(shell.children).forEach((child) => {
@@ -132,6 +137,7 @@ export function WorldNav() {
 
   return (
     <>
+      <CloudCellar />
       <button
         className="world-trigger"
         type="button"

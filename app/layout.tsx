@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./room-backgrounds.css";
 import { TavernLife } from "./TavernLife";
-import { CloudCellar } from "./CloudCellar";
 
 export const metadata: Metadata = {
   title: "绯界",
@@ -28,7 +27,6 @@ export default function RootLayout({
       </head>
       <body>
         <TavernLife />
-        <CloudCellar />
         {children}
       </body>
     </html>
