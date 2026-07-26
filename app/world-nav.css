@@ -324,3 +324,34 @@
   .world-map-legend { flex-wrap: wrap; gap: 10px 16px; }
   .world-map-legend em { width: 100%; margin-left: 0; }
 }
+
+/* Shared room badges: keep the drawer and atlas on one visual language. */
+.world-space-icon,
+.world-map-node .world-map-building {
+  overflow: hidden;
+  border-color: rgba(151, 63, 79, .72);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 24%, rgba(255,255,255,.08), transparent 34%),
+    linear-gradient(155deg, rgba(62, 25, 35, .96), rgba(20, 9, 13, .98));
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.34),
+    inset 0 0 14px rgba(215,184,117,.035);
+}
+
+.world-space-list > button:hover .world-space-icon,
+.world-space-list > button.is-active .world-space-icon,
+.world-map-node:hover .world-map-building,
+.world-map-node.is-active .world-map-building {
+  border-color: rgba(215,184,117,.78);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.42),
+    0 0 18px rgba(151,42,64,.18),
+    inset 0 0 16px rgba(215,184,117,.05);
+}
+
+@media (max-width: 760px) {
+  .world-map-node .world-map-building {
+    border-radius: 50%;
+  }
+}
