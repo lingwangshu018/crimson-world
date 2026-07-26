@@ -17,6 +17,7 @@ const TIME_WHEEL_HISTORY_KEY = "public_tm_history_v2";
 const TIME_WHEEL_MODULES_KEY = "public_tm_modules_v2";
 const CAFE_RECORDS_KEY = "crimson-cafe.records.v1";
 const CAFE_RECIPES_KEY = "crimson-cafe.recipes.v1";
+const KEYS_DIRTY_KEY = "crimson-world.vault-keys-dirty.v1";
 
 function getRecordsApiUrl(value: string) {
   const configured = value.trim();
@@ -47,13 +48,15 @@ replace(
   const [timeWheelCount, setTimeWheelCount] = useState(0);
   const [cafeCount, setCafeCount] = useState(0);
   const [apiUrl, setApiUrl] = useState(DEFAULT_API_URL);
-  const [advancedOpen, setAdvancedOpen] = useState(false);`,
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [keySyncPending, setKeySyncPending] = useState(false);`,
 );
 
 replace(
   '    setGuestName(read(GUEST_NAME_KEY) || "客人");',
   `    setGuestName(read(GUEST_NAME_KEY) || "客人");
-    setApiUrl(read(API_URL_KEY) || DEFAULT_API_URL);`,
+    setApiUrl(read(API_URL_KEY) || DEFAULT_API_URL);
+    setKeySyncPending(read(KEYS_DIRTY_KEY) === "1");`,
 );
 
 replace(
@@ -76,12 +79,55 @@ replace(
       const timeWheelModules = JSON.parse(read(TIME_WHEEL_MODULES_KEY) || "[]") as CloudRecord[];
       const cafeRecords = JSON.parse(read(CAFE_RECORDS_KEY) || "[]") as CloudRecord[];
       records.push(...cafeRecords.map((item) => ({ ...item, module: "cafe" })));
+      const unifiedRecords: CloudRecord[] = [
+        ...records.map((item) => ({ ...item, module: String(item.module || "tavern") })),
+        ...journal.map((item) => ({
+          ...item,
+          module: "journal",
+          title: String(item.title || "未命名日记"),
+          summary: String(item.content || "").slice(0, 240),
+          content: String(item.content || ""),
+          note: String(item.reply || item.note || ""),
+        })),
+        ...timeWheelHistory.map((item) => ({
+          ...item,
+          module: "time-wheel",
+          title: String(item.title || item.name || "时光记录"),
+          summary: String(item.summary || item.content || item.topic || "").slice(0, 240),
+          content: String(item.content || item.summary || item.topic || ""),
+          note: String(item.ai_reply || item.note || ""),
+        })),
+      ];
       const response = await fetch(apiUrl, {`,
 );
 
 replace(
   '        body: JSON.stringify({ readKey, noteKey, settings: { guest, bartender, journal, journalFolders, archiveVersion: 2 }, records }),',
   '        body: JSON.stringify({ readKey, noteKey, settings: { guest, bartender, journal, journalFolders, timeWheelHistory, timeWheelModules, archiveVersion: 3 }, records }),',
+);
+
+replace(
+  '      const result = (await response.json()) as { error?: string; syncedAt?: string; recordCount?: number };\n      if (!response.ok || !result.syncedAt) throw new Error(result.error || "云存档失败");\n      write(OWNER_KEY, currentOwner);',
+  `      const result = (await response.json()) as { error?: string; syncedAt?: string; recordCount?: number };
+      if (!response.ok || !result.syncedAt) throw new Error(result.error || "云存档失败");
+      const recordsApiUrl = getRecordsApiUrl(apiUrl);
+      const recordsResponse = await fetch(recordsApiUrl, {
+        method: "PUT",
+        headers: {
+          Authorization: "Bearer " + currentOwner,
+          "X-Crimson-Key": currentOwner,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ readKey, replyKey: noteKey, records: unifiedRecords }),
+      });
+      const recordsResult = (await recordsResponse.json().catch(() => ({}))) as { error?: string; syncedIds?: string[] };
+      if (!recordsResponse.ok || !Array.isArray(recordsResult.syncedIds)) {
+        throw new Error(recordsResult.error || "统一记录库钥匙更新失败");
+      }
+      write(KEYS_DIRTY_KEY, "0");
+      setKeySyncPending(false);
+      write(OWNER_KEY, currentOwner);`,
 );
 
 replace(
