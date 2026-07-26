@@ -1,5 +1,5 @@
 export type RoomStatus = "ready" | "planned";
-export type RoomRenderer = "native" | "journal" | "wheel" | "study" | "preview";
+export type RoomRenderer = "native" | "cafe" | "journal" | "wheel" | "study" | "preview";
 export type RoomTheme = "tavern" | "daylight" | "paper" | "bronze" | "library";
 
 type RoomCapabilities = {
@@ -31,9 +31,9 @@ export const roomRegistry = [
     icon: "啡",
     name: "绯昼咖啡馆",
     english: "THE CRIMSON CAFE",
-    description: "留给白昼、咖啡与轻声交谈的房间",
-    status: "planned",
-    renderer: "preview",
+    description: "点一杯咖啡，看一段只属于你们的故事",
+    status: "ready",
+    renderer: "cafe",
     theme: "daylight",
     map: { x: 72, y: 66 },
     capabilities: { memory: true, cloud: true, timeline: false },
