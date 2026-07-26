@@ -162,7 +162,7 @@ export function StudyRoom() {
       </header>
 
       <main className="study-sanctum">
-        <aside className="study-profile">
+        <aside className="study-profile" style={{ order: 2 }}>
           <p className="study-kicker">STUDY ARCHIVE · 学习档案</p>
           <blockquote>“把时间留给真正重要的事。”</blockquote>
           <div className="study-overview">
@@ -177,7 +177,7 @@ export function StudyRoom() {
           </div>
         </aside>
 
-        <section className="study-timer" aria-label="专注计时器">
+        <section className="study-timer" style={{ order: 1 }} aria-label="专注计时器">
           <header><div><p>{phase === "focus" ? "FOCUS SESSION" : "REST SESSION"}</p><h2>{phase === "focus" ? "专注时刻" : "短暂休息"}</h2></div><span>第 {profile.todaySessions + 1} 次灯火</span></header>
           <div className="study-ring">
             <svg viewBox="0 0 240 240" aria-hidden="true">
