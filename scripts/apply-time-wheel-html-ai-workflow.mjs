@@ -53,92 +53,80 @@ source = source.replace(
     const keys = ensureKeys();`,
 );
 
-const contentAnchor = `            content: item.content || "",
-             note: item.ai_reply || "",`;
-
-if (!source.includes(contentAnchor)) {
+const contentPattern = /\s+content:\s*item\.content\s*\|\|\s*"",\s*\n\s*note:\s*item\.ai_reply\s*\|\|\s*"",/;
+if (!contentPattern.test(source)) {
   throw new Error("Time Wheel unified-record content anchor not found");
 }
 
 source = source.replace(
-  contentAnchor,
-  `            content: [
-               "【时光之轮模块名称】",
-               String(item.module_name || sourceModule?.name || "未命名模块"),
-               "",
-               "【本次主题】",
-               topic || "（未填写：由 AI 根据模板、角色设定、世界书与近期记忆随机生成）",
-               "",
-               "【补充要求】",
-               extra || "（未填写）",
-               "",
-               "【模块提示词】",
-               modulePrompt || "（未填写）",
-               "",
-               "【HTML 模板】",
-               templateHtml
-             ].join("\\n"),
-             note: item.ai_reply || "",`,
+  contentPattern,
+  `\n            content: [
+              "【时光之轮模块名称】",
+              String(item.module_name || sourceModule?.name || "未命名模块"),
+              "",
+              "【本次主题】",
+              topic || "（未填写：由 AI 根据模板、角色设定、世界书与近期记忆随机生成）",
+              "",
+              "【补充要求】",
+              extra || "（未填写）",
+              "",
+              "【模块提示词】",
+              modulePrompt || "（未填写）",
+              "",
+              "【HTML 模板】",
+              templateHtml
+            ].join("\\n"),
+            note: item.ai_reply || "",`,
 );
 
-const metadataAnchor = `              topic: item.topic || "",
-             },`;
-
-if (source.includes(metadataAnchor)) {
+const metadataPattern = /topic:\s*item\.topic\s*\|\|\s*"",\s*\n\s*},/;
+if (metadataPattern.test(source)) {
   source = source.replace(
-    metadataAnchor,
-    `              topic,
-               extra,
-               randomMode,
-               templateSnapshot: true,
-               outputFormat: "single-line-html",
-             },`,
+    metadataPattern,
+    `topic,
+              extra,
+              randomMode,
+              templateSnapshot: true,
+              outputFormat: "single-line-html",
+            },`,
   );
 }
 
-const taskAnchor = `      "请读取这条记录的完整内容。",
-       "",
-       "结合当前聊天已经加载的角色卡、世界书和近期记忆，继续完成这一事件。",
-       "",
-       "完成后，请使用回复钥匙，将完整回复写回本条记录的 note 字段。",
-       "不要修改原始记录，不要创建新的记录，不要回复到其它记录。",
-       "只处理这一条记录即可。",`;
+const taskPattern = /\s*"请读取这条记录的完整内容。",\s*\n\s*"",\s*\n\s*"结合当前聊天已经加载的角色卡、世界书和近期记忆，继续完成这一事件。",\s*\n\s*"",\s*\n\s*"完成后，请使用回复钥匙，将完整回复写回本条记录的 note 字段。",\s*\n\s*"不要修改原始记录，不要创建新的记录，不要回复到其它记录。",\s*\n\s*"只处理这一条记录即可。",/;
 
-if (!source.includes(taskAnchor)) {
+if (!taskPattern.test(source)) {
   throw new Error("Time Wheel AI task instruction anchor not found");
 }
 
 source = source.replace(
-  taskAnchor,
-  `      "请读取这条记录的完整内容，其中包含本次主题、补充要求、模块提示词和完整 HTML 模板。",
-       "",
-       randomMode
-         ? "本次没有填写主题和补充要求。请根据记录中的 HTML 模板，并结合当前聊天已加载的角色卡、世界书、核心记忆与近期记忆，随机生成一次符合设定的完整内容。"
-         : "请严格依据本次主题、补充要求、模块提示词，并结合当前聊天已加载的角色卡、世界书、核心记忆与近期记忆，填充 HTML 模板。",
-       "",
-       "【代码输出约束】",
-       "• 不得使用任何 Markdown 代码围栏，必须直接输出纯 HTML 字符串。",
-       "• 严格使用记录中提供的 HTML/CSS 架构，不得修改样式。",
-       "• 必须将全部代码压缩为单行输出，中间不得换行。",
-       "• 将模板占位符依次替换，填充内容字数充足。",
-       "• 填充内容必须严格依据角色设定、世界书、核心记忆与近期记忆。",
-       "",
-       "完成后，请使用回复钥匙，将这段单行纯 HTML 完整写回本条记录的 note 字段。",
-       "不要修改原始记录，不要创建新的记录，不要回复到其它记录。",
-       "只处理这一条记录即可。",`,
+  taskPattern,
+  `
+      "请读取这条记录的完整内容，其中包含本次主题、补充要求、模块提示词和完整 HTML 模板。",
+      "",
+      randomMode
+        ? "本次没有填写主题和补充要求。请根据记录中的 HTML 模板，并结合当前聊天已加载的角色卡、世界书、核心记忆与近期记忆，随机生成一次符合设定的完整内容。"
+        : "请严格依据本次主题、补充要求、模块提示词，并结合当前聊天已加载的角色卡、世界书、核心记忆与近期记忆，填充 HTML 模板。",
+      "",
+      "【代码输出约束】",
+      "• 不得使用任何 Markdown 代码围栏，必须直接输出纯 HTML 字符串。",
+      "• 严格使用记录中提供的 HTML/CSS 架构，不得修改样式。",
+      "• 必须将全部代码压缩为单行输出，中间不得换行。",
+      "• 将模板占位符依次替换，填充内容字数充足。",
+      "• 填充内容必须严格依据角色设定、世界书、核心记忆与近期记忆。",
+      "",
+      "完成后，请使用回复钥匙，将这段单行纯 HTML 完整写回本条记录的 note 字段。",
+      "不要修改原始记录，不要创建新的记录，不要回复到其它记录。",
+      "只处理这一条记录即可。",`,
 );
 
-const pullAnchor = `      writeHistory(next);
-       setStatus(count ? "已收取 " + count + " 条新回复。" : "暂时没有新的 AI 回复。");
-       refreshHistoryTools();`;
-
-if (source.includes(pullAnchor)) {
+const pullPattern = /writeHistory\(next\);\s*\n\s*setStatus\(count \? "已收取 " \+ count \+ " 条新回复。" : "暂时没有新的 AI 回复。"\);\s*\n\s*refreshHistoryTools\(\);/;
+if (pullPattern.test(source)) {
   source = source.replace(
-    pullAnchor,
-    `      writeHistory(next);
-       setStatus(count ? "已收取 " + count + " 条新回复，并写回对应记录。" : "暂时没有新的 AI 回复。");
-       refreshHistoryTools();
-       if (count) setTimeout(() => location.reload(), 400);`,
+    pullPattern,
+    `writeHistory(next);
+      setStatus(count ? "已收取 " + count + " 条新回复，并写回对应记录。" : "暂时没有新的 AI 回复。");
+      refreshHistoryTools();
+      if (count) setTimeout(() => location.reload(), 400);`,
   );
 }
 
