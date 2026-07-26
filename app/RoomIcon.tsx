@@ -20,7 +20,7 @@ const common = {
 };
 
 export function RoomIcon({ roomId, size, variant = "map" }: RoomIconProps) {
-  const iconSize = size ?? (variant === "sidebar" ? 28 : 64);
+  const iconSize = size ?? (variant === "sidebar" ? 24 : 38);
   const props = { ...common, width: iconSize, height: iconSize };
 
   if (roomId === "tavern") return <svg {...props}><path d="M12 16h21v11a9 9 0 0 1-9 9h-3a9 9 0 0 1-9-9V16Z"/><path d="M33 19h3a5 5 0 0 1 0 10h-3"/><path d="M16 12c1.8-2 4.2-2 6 0s4.2 2 6 0"/></svg>;
