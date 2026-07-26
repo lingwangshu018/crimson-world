@@ -113,7 +113,7 @@ ${uploadAnchor}`,
   }
   source = source.replace(
     replyUiAnchor,
-    `{current.reply ? <aside><b>机的回音</b><p>{current.reply}</p><time>落笔于 {formatDate(current.replyAt)}</time></aside> : null}<div className="journal-reply-actions"><button className="journal-reply" onClick={requestReply}>{current.vaultSyncedAt ? "重新发送任务单" : "呼唤机回信"}</button><button className="journal-reply journal-reply-pull" onClick={collectReply} disabled={replyBusy}>{replyBusy ? "正在收取…" : current.reply ? "检查新回信" : "收取回信"}</button></div>`,
+    `{current.reply ? <aside><b>机的回音</b><p>{current.reply}</p><time>落笔于 {formatDate(current.replyAt)}</time></aside> : null}<div className="journal-reply-actions"><button className="journal-reply" onClick={requestReply}>{current.vaultSyncedAt ? "重发任务" : "呼唤回信"}</button><button className="journal-reply journal-reply-pull" onClick={collectReply} disabled={replyBusy}>{replyBusy ? "收取中…" : current.reply ? "检查新回信" : "收取回信"}</button></div>`,
   );
 
   fs.writeFileSync(componentPath, source);
@@ -123,11 +123,15 @@ if (!styles.includes("CRIMSON_JOURNAL_REPLY_COLLECTION_STYLES")) {
   styles += `
 
 /* CRIMSON_JOURNAL_REPLY_COLLECTION_STYLES */
-.journal-reply-actions{display:flex;gap:10px;margin:22px 0 0;align-items:center;justify-content:center;flex-wrap:wrap}
-.journal-reply-actions .journal-reply{width:auto;min-width:150px;margin:0;padding:12px 22px;border-radius:14px;font-size:14px;letter-spacing:.08em;box-shadow:0 6px 16px rgba(86,57,30,.14)}
-.journal-reply-actions .journal-reply-pull{border-color:rgba(120,89,56,.3);background:rgba(116,76,67,.9)}
+.journal-read-content{min-height:180px}
+.journal-reply-actions{display:flex;gap:8px;margin:14px 0 0;align-items:center;justify-content:flex-end;flex-wrap:wrap;padding-top:12px;border-top:1px dashed rgba(113,84,52,.18)}
+.journal-reply-actions .journal-reply{width:auto;min-width:104px;height:40px;margin:0;padding:0 16px;border:1px solid rgba(120,89,56,.3);border-radius:999px;background:rgba(255,248,231,.72);color:#765638;font-size:13px;font-weight:700;letter-spacing:.04em;box-shadow:none}
+.journal-reply-actions .journal-reply:hover{background:rgba(145,105,60,.12)}
+.journal-reply-actions .journal-reply-pull{border-color:rgba(132,75,85,.34);background:rgba(116,76,67,.12);color:#81535b}
 .journal-reply-actions .journal-reply:disabled{opacity:.55;cursor:wait}
-@media(max-width:560px){.journal-reply-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}.journal-reply-actions .journal-reply{min-width:0;width:100%;padding:12px 8px;border-radius:12px;font-size:13px;letter-spacing:.04em}}
+.paper-night .journal-reply-actions{border-top-color:rgba(255,255,255,.12)}
+.paper-night .journal-reply-actions .journal-reply{background:rgba(255,255,255,.05);color:#dbc49d;border-color:rgba(201,169,107,.28)}
+@media(max-width:560px){.journal-read-content{min-height:150px}.journal-reply-actions{justify-content:flex-end;gap:7px;margin-top:12px;padding-top:10px}.journal-reply-actions .journal-reply{min-width:96px;height:38px;padding:0 13px;font-size:12px}}
 `;
   fs.writeFileSync(stylePath, styles);
 }
