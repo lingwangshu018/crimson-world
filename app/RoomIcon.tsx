@@ -17,7 +17,7 @@ const roomIconMap: Record<RoomId, string> = {
 export function RoomIcon({ roomId, size, variant = "map" }: RoomIconProps) {
   const icon = roomIconMap[roomId] ?? "✦";
   const iconSize = size ?? (variant === "sidebar" ? 36 : 64);
-  const fontScale = variant === "sidebar" ? 0.65 : 0.55;
+  const fontScale = variant === "sidebar" ? 0.55 : 0.55;
 
   return (
     <span
@@ -32,7 +32,7 @@ export function RoomIcon({ roomId, size, variant = "map" }: RoomIconProps) {
         flexShrink: 0,
         fontSize: `${iconSize * fontScale}px`,
         lineHeight: 1,
-        transform: "translateY(1px)",
+        transform: "none",
       }}
     >
       {icon}
