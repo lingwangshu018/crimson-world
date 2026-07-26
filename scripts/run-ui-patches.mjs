@@ -10,6 +10,7 @@ const patches = [
   { file: "apply-journal-ai-mailbox.mjs", label: "journal mailbox" },
   { file: "apply-journal-sync-metadata.mjs", label: "journal sync metadata" },
   { file: "apply-journal-paper-polish.mjs", label: "journal paper theme" },
+  { file: "apply-journal-line-alignment.mjs", label: "journal ruled-line alignment" },
   { file: "apply-journal-pin-favorite.mjs", label: "journal pin and favorite" },
   { file: "apply-cloud-orb-top-layer.mjs", label: "cloud orb layer" },
   { file: "apply-cloud-journal-archive.mjs", label: "cloud journal archive" },
