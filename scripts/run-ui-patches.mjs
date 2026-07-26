@@ -38,7 +38,7 @@ const patches = [
   { file: "apply-time-wheel-html-ai-workflow.mjs", label: "time wheel HTML template AI workflow" },
   { file: "apply-time-wheel-html-write-guard.mjs", label: "time wheel HTML reply validation" },
   { file: "apply-cafe-room.mjs", label: "standalone Crimson Cafe room" },
-  { file: "apply-cloud-core-v2.mjs", label: "shared Cloud Core v2 for cafe" },
+  { file: "apply-strict-room-isolation.mjs", label: "strict room isolation" },
   { file: "apply-study-room.mjs", label: "study rooms" },
 ];
 
