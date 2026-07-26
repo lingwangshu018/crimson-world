@@ -67,16 +67,10 @@ if (!cloud.includes("CRIMSON_ASSISTIVE_CLOUD_MENU")) {
     await saveToCloud();
   }
 
-  function returnToPreviousPage() {
+  function returnToMap() {
     setAssistiveOpen(false);
     setOpen(false);
-    window.history.back();
-  }
-
-  function returnToHomePage() {
-    setAssistiveOpen(false);
-    setOpen(false);
-    window.dispatchEvent(new CustomEvent("crimson:home"));
+    window.dispatchEvent(new CustomEvent("crimson:map"));
   }`,
   );
 
@@ -93,8 +87,7 @@ if (!cloud.includes("CRIMSON_ASSISTIVE_CLOUD_MENU")) {
           <nav className="assistive-cloud-menu" aria-label="绯界快捷菜单" style={{ left: position.x, top: position.y }}>
             <button type="button" onClick={() => void quickSaveToCloud()} disabled={Boolean(busy)}><span>☁️</span><small>{busy === "save" ? "保存中" : "云端保存"}</small></button>
             <button type="button" onClick={openArchive}><span>📜</span><small>存档中心</small></button>
-            <button type="button" onClick={returnToPreviousPage}><span>↩</span><small>返回上一页</small></button>
-            <button type="button" onClick={returnToHomePage}><span>🏠</span><small>回到主页面</small></button>
+            <button type="button" onClick={returnToMap}><span>⌖</span><small>地图</small></button>
             <button type="button" onClick={() => setAssistiveOpen(false)}><span>×</span><small>收起</small></button>
           </nav>
         </>
@@ -109,13 +102,13 @@ if (!cloud.includes("CRIMSON_ASSISTIVE_CLOUD_MENU")) {
 if (!nav.includes("CRIMSON_ASSISTIVE_NAV_EVENTS")) {
   const marker = "  // CRIMSON_ASSISTIVE_NAV_EVENTS";
   const eventEffect = `  useEffect(() => {
-    function onHome() {
-      selectSpace(roomRegistry[0]);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    function onMap() {
+      setOpen(false);
+      setMapOpen(true);
     }
-    window.addEventListener("crimson:home", onHome);
+    window.addEventListener("crimson:map", onMap);
     return () => {
-      window.removeEventListener("crimson:home", onHome);
+      window.removeEventListener("crimson:map", onMap);
     };
   }, []);
 
