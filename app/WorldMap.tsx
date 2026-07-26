@@ -38,7 +38,7 @@ function isPlannedRoom(status: RoomStatus) {
 export function WorldMap({ open, active, onClose, onSelect }: WorldMapProps) {
   const rooms = getVisibleRooms();
   const roomById = useMemo(
-    () => new Map<RoomId, RoomDefinition>(rooms.map((room) => [room.id, room])),
+    () => new Map<RoomId, RoomDefinition>(rooms.map((room) => [room.id, room] as const)),
     [rooms],
   );
   const [progress, setProgress] = useState<WorldProgress>(EMPTY_PROGRESS);
