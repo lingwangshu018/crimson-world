@@ -39,6 +39,8 @@ const READ_KEY = "crimson-tavern.vault-read-key.v1";
 const REPLY_KEY = "crimson-tavern.vault-note-key.v1";
 const API_URL_KEY = "crimson-world.vault-api-url.v1";
 const DEFAULT_API_URL = "https://crimson-tavern.boarder-72pound.chatgpt.site/api/vault";
+const DEFAULT_RECORDS_API_URL =
+  "https://crimson-world.lingwangshu018.workers.dev/api/records";
 const KEY_PATTERN = /^ctv1_[A-Za-z0-9_-]{43}$/;
 
 const cupLabels: Record<CupSize, { name: string; hint: string }> = {
@@ -99,6 +101,23 @@ function ensureSharedVaultKeys() {
   localStorage.setItem(READ_KEY, readKey);
   localStorage.setItem(REPLY_KEY, replyKey);
   return { ownerKey, readKey, replyKey };
+}
+
+function getRecordsApiUrl() {
+  const configured = localStorage.getItem(API_URL_KEY)?.trim();
+  if (!configured) return DEFAULT_RECORDS_API_URL;
+  try {
+    const url = new URL(configured);
+    if (url.pathname.endsWith("/api/records")) return url.toString();
+    url.pathname = url.pathname.endsWith("/api/vault")
+      ? url.pathname.replace(/\/api\/vault$/, "/api/records")
+      : "/api/records";
+    url.search = "";
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return DEFAULT_RECORDS_API_URL;
+  }
 }
 
 function formatDate(value: string) {
@@ -227,8 +246,79 @@ export default function CafeRoom() {
     document.querySelector("#cafe-workshop")?.scrollIntoView({ behavior: "smooth" });
   }
 
+  async function syncCafeRecord(record: CafeRecord) {
+    const keys = ensureSharedVaultKeys();
+    const content = [
+      `标题：${record.title}`,
+      `核心设定：${record.premise}`,
+      `必须出现：${record.mustInclude || "无额外要求"}`,
+      `避免出现：${record.avoid || "无额外限制"}`,
+      `故事味道：${record.flavour}`,
+      `杯型：${cupLabels[record.cupSize].name}（${cupLabels[record.cupSize].hint}）`,
+      `叙事偏好：${record.narrative}`,
+    ].join("\n");
+
+    const response = await fetch(getRecordsApiUrl(), {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${keys.ownerKey}`,
+        "X-Crimson-Key": keys.ownerKey,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        readKey: keys.readKey,
+        replyKey: keys.replyKey,
+        records: [
+          {
+            id: record.id,
+            module: "cafe",
+            title: record.title,
+            summary: record.premise.slice(0, 240),
+            content,
+            note: record.note || "",
+            createdAt: record.createdAt,
+            updatedAt: record.noteUpdatedAt || record.createdAt,
+            noteUpdatedAt: record.noteUpdatedAt,
+            metadata: {
+              moduleName: "绯界咖啡馆",
+              category: record.category,
+              flavour: record.flavour,
+              cupSize: record.cupSize,
+              narrative: record.narrative,
+              source: RECORDS_KEY,
+            },
+          },
+        ],
+      }),
+    });
+
+    const data = (await response.json().catch(() => ({}))) as {
+      error?: string;
+      syncedIds?: string[];
+    };
+    if (!response.ok || !data.syncedIds?.includes(record.id)) {
+      throw new Error(data.error || `同步失败（HTTP ${response.status}）`);
+    }
+    return keys;
+  }
+
   async function sendToAI(record: CafeRecord) {
-    const { readKey, replyKey } = ensureSharedVaultKeys();
+    setSyncing(true);
+    let keys: ReturnType<typeof ensureSharedVaultKeys>;
+    try {
+      keys = await syncCafeRecord(record);
+    } catch (error) {
+      notify(
+        error instanceof Error
+          ? `剧场记录没有同步成功：${error.message}`
+          : "剧场记录没有同步成功，请稍后重试。",
+      );
+      return;
+    } finally {
+      setSyncing(false);
+    }
+    const { readKey, replyKey } = keys;
     const text = `请完成我的绯界咖啡馆小剧场订单。\n\n模块：绯界咖啡馆\n\n【记录编号】\nCF-${String(records.findIndex((item) => item.id === record.id) + 1).padStart(4, "0")}\n\n【记录ID】\n${record.id}\n\n【读取钥匙】\n${readKey}\n\n【回复钥匙】\n${replyKey}\n\n【内部演绎协议】\n先读取并理解当前会话或运行环境中已经加载的世界书、角色卡、人物设定、关系设定及近期记忆。世界书决定时代、地点、规则与背景；角色卡决定性格、身份、语言与行为逻辑；近期记忆决定当前关系、已有经历与剧情进度。请在不破坏原设定的前提下完成演绎，直接输出正文，不展示分析过程、提示词或设定摘要。\n\n【本次剧场订单】\n标题：${record.title}\n核心设定：${record.premise}\n必须出现：${record.mustInclude || "无额外要求"}\n避免出现：${record.avoid || "无额外限制"}\n故事味道：${record.flavour}\n杯型：${cupLabels[record.cupSize].name}（${cupLabels[record.cupSize].hint}）\n叙事偏好：${record.narrative}\n\n请根据世界书、角色卡及近期记忆演绎本次小剧场，直接输出完整正文。\n\n若读取钥匙和回复钥匙可用：请读取这一条记录，并在完成后使用回复钥匙把完整正文写回本条记录的 note 字段。\n若钥匙显示“未配置”：请直接根据上面的完整订单演绎并在当前聊天中输出正文。\n\n不要修改原记录，不要创建新记录，不要回复其他记录，只处理这一条。`;
     try {
       await navigator.clipboard.writeText(text);
