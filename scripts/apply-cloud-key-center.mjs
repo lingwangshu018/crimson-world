@@ -100,7 +100,7 @@ if (!cloud.includes("CRIMSON_CLOUD_KEY_CENTER")) {
                   ))}
                 </div>
                 <button className="cloud-reset-keys" type="button" onClick={regenerateAllCredentials}>⚠️ 全部重新生成钥匙</button>
-                <small className={`cloud-key-footnote ${keySyncPending ? "is-pending" : ""}`}>{keySyncPending ? "⚠️ 新钥匙尚未同步，云端仍在使用上一套钥匙。请立即执行“全部同步”。" : "三把钥匙已经与最近一次云端同步保持一致。"}</small>
+                <small className={keySyncPending ? "cloud-key-footnote is-pending" : "cloud-key-footnote"}>{keySyncPending ? "⚠️ 新钥匙尚未同步，云端仍在使用上一套钥匙。请立即执行“全部同步”。" : "三把钥匙已经与最近一次云端同步保持一致。"}</small>
               </div>`;
 
   if (cloud.includes(oldAdvanced)) {
