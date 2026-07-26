@@ -12,23 +12,24 @@ if (source.includes(marker)) {
 source += `
 
 /* ${marker} */
-/* Keep every text baseline sitting directly on the ruled paper line. */
+/* Match the 32px writing rhythm without lifting rules through the glyphs. */
 .journal-editor textarea {
+  padding-top: 3px;
   line-height: 32px;
-  background-position: 0 -8px;
+  background-position: 0 0;
   background-attachment: local;
 }
 .paper-night .journal-editor textarea {
-  background-position: 0 -8px;
+  background-position: 0 0;
 }
 @media (max-width: 600px) {
   .journal-editor textarea {
     padding-top: 3px;
     line-height: 32px;
-    background-position: 0 -8px;
+    background-position: 0 0;
   }
 }
 `;
 
 fs.writeFileSync(path, source);
-console.log("Aligned Journal editor text baselines with ruled paper lines.");
+console.log("Aligned Journal editor rules below each text baseline.");
