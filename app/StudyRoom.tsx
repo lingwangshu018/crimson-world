@@ -164,8 +164,6 @@ export function StudyRoom() {
       <main className="study-sanctum">
         <aside className="study-profile">
           <p className="study-kicker">STUDY ARCHIVE · 学习档案</p>
-          <span className="study-seal">静</span>
-          <h2>静谧自习室</h2>
           <blockquote>“把时间留给真正重要的事。”</blockquote>
           <div className="study-overview">
             <article><span>今日专注</span><strong>{profile.todayMinutes}</strong><small>分钟</small></article>
