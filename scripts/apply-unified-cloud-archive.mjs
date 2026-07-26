@@ -15,6 +15,7 @@ replace(
 const API_URL_KEY = "crimson-world.vault-api-url.v1";
 const TIME_WHEEL_HISTORY_KEY = "public_tm_history_v2";
 const TIME_WHEEL_MODULES_KEY = "public_tm_modules_v2";
+const CAFE_RECORDS_KEY = "crimson-cafe.records.v1";
 
 // CRIMSON_UNIFIED_CLOUD_ARCHIVE`,
 );
@@ -23,6 +24,7 @@ replace(
   '  const [recordCount, setRecordCount] = useState(0);',
   `  const [recordCount, setRecordCount] = useState(0);
   const [timeWheelCount, setTimeWheelCount] = useState(0);
+  const [cafeCount, setCafeCount] = useState(0);
   const [apiUrl, setApiUrl] = useState(DEFAULT_API_URL);
   const [advancedOpen, setAdvancedOpen] = useState(false);`,
 );
@@ -40,6 +42,10 @@ replace(
     try {
       const timeWheel = JSON.parse(read(TIME_WHEEL_HISTORY_KEY) || "[]");
       setTimeWheelCount(Array.isArray(timeWheel) ? timeWheel.length : 0);
+    } catch {}
+    try {
+      const cafe = JSON.parse(read(CAFE_RECORDS_KEY) || "[]");
+      setCafeCount(Array.isArray(cafe) ? cafe.length : 0);
     } catch {}`,
 );
 
@@ -47,6 +53,8 @@ replace(
   '      const response = await fetch(API_URL, {',
   `      const timeWheelHistory = JSON.parse(read(TIME_WHEEL_HISTORY_KEY) || "[]") as CloudRecord[];
       const timeWheelModules = JSON.parse(read(TIME_WHEEL_MODULES_KEY) || "[]") as CloudRecord[];
+      const cafeRecords = JSON.parse(read(CAFE_RECORDS_KEY) || "[]") as CloudRecord[];
+      records.push(...cafeRecords.map((item) => ({ ...item, module: "cafe" })));
       const response = await fetch(apiUrl, {`,
 );
 
@@ -57,7 +65,7 @@ replace(
 
 replace(
   '      setJournalCount(journal.length);\n      setMessage(`今晚的故事与日记都收好了：${result.recordCount ?? records.length} 杯酒，${journal.length} 篇日记。`);',
-  '      setJournalCount(journal.length);\n      setTimeWheelCount(timeWheelHistory.length);\n      write(API_URL_KEY, apiUrl);\n      setMessage(`全部项目已经同步：${result.recordCount ?? records.length} 杯酒，${journal.length} 篇日记，${timeWheelHistory.length} 条时光记录。`);',
+  '      setJournalCount(journal.length);\n      setTimeWheelCount(timeWheelHistory.length);\n      setCafeCount(cafeRecords.length);\n      write(API_URL_KEY, apiUrl);\n      setMessage(`全部项目已经同步：${result.recordCount ?? records.length} 条云记录，${journal.length} 篇日记，${timeWheelHistory.length} 条时光记录，${cafeRecords.length} 篇咖啡馆剧场。`);',
 );
 
 replace(
@@ -77,12 +85,17 @@ replace(
   `      write(JOURNAL_FOLDER_KEY, JSON.stringify(cloudJournalFolders));
       write(TIME_WHEEL_HISTORY_KEY, JSON.stringify(cloudTimeWheelHistory));
       write(TIME_WHEEL_MODULES_KEY, JSON.stringify(cloudTimeWheelModules));
+      const cloudCafeRecords = records.filter((item) => {
+        const record = item as Record<string, unknown>;
+        return record.module === "cafe" || String(record.id || "").startsWith("cafe-");
+      });
+      write(CAFE_RECORDS_KEY, JSON.stringify(cloudCafeRecords));
       write(API_URL_KEY, apiUrl);`,
 );
 
 replace(
   '      setJournalCount(cloudJournal.length);\n      setMessage(`……原来是你。${records.length} 杯酒与 ${cloudJournal.length} 篇日记都回来了。`);',
-  '      setJournalCount(cloudJournal.length);\n      setTimeWheelCount(cloudTimeWheelHistory.length);\n      setMessage(`全部档案已经回来：${records.length} 杯酒、${cloudJournal.length} 篇日记、${cloudTimeWheelHistory.length} 条时光记录。`);',
+  '      setJournalCount(cloudJournal.length);\n      setTimeWheelCount(cloudTimeWheelHistory.length);\n      setCafeCount(cloudCafeRecords.length);\n      setMessage(`全部档案已经回来：${records.length} 条云记录、${cloudJournal.length} 篇日记、${cloudTimeWheelHistory.length} 条时光记录、${cloudCafeRecords.length} 篇咖啡馆剧场。`);',
 );
 
 replace(
@@ -95,6 +108,7 @@ replace(
       tavern: { history: JSON.parse(read(HISTORY_KEY) || "[]"), settings: JSON.parse(read(SETTINGS_KEY) || "{}") },
       journal: { diaries: JSON.parse(read(JOURNAL_KEY) || "[]"), folders: JSON.parse(read(JOURNAL_FOLDER_KEY) || "[]") },
       timeWheel: { history: JSON.parse(read(TIME_WHEEL_HISTORY_KEY) || "[]"), modules: JSON.parse(read(TIME_WHEEL_MODULES_KEY) || "[]") },
+      cafe: { records: JSON.parse(read(CAFE_RECORDS_KEY) || "[]") },
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -122,6 +136,7 @@ replace(
         write(JOURNAL_FOLDER_KEY, JSON.stringify(payload.journal?.folders || []));
         write(TIME_WHEEL_HISTORY_KEY, JSON.stringify(payload.timeWheel?.history || []));
         write(TIME_WHEEL_MODULES_KEY, JSON.stringify(payload.timeWheel?.modules || []));
+        write(CAFE_RECORDS_KEY, JSON.stringify(payload.cafe?.records || []));
         setMessage("全部项目已导入，页面即将刷新。✨");
         window.setTimeout(() => window.location.reload(), 900);
       } catch (error) { setMessage(error instanceof Error ? error.message : "导入失败"); }
@@ -140,11 +155,14 @@ replace(
       const cloud = new Map((result.records || []).map((item) => [String(item.id), item]));
       const journal = JSON.parse(read(JOURNAL_KEY) || "[]") as Array<Record<string, any>>;
       const timeWheel = JSON.parse(read(TIME_WHEEL_HISTORY_KEY) || "[]") as Array<Record<string, any>>;
+      const cafe = JSON.parse(read(CAFE_RECORDS_KEY) || "[]") as Array<Record<string, any>>;
       let count = 0;
       const nextJournal = journal.map((item) => { const remote = cloud.get(String(item.id)); if (remote?.note && remote.note !== item.reply) { count += 1; return { ...item, reply: remote.note, replyAt: remote.noteUpdatedAt ? new Date(remote.noteUpdatedAt).getTime() : Date.now() }; } return item; });
       const nextTimeWheel = timeWheel.map((item) => { const remote = cloud.get(String(item.id)); if (remote?.note && remote.note !== item.ai_reply) { count += 1; return { ...item, ai_reply: remote.note, ai_reply_at: remote.noteUpdatedAt ? new Date(remote.noteUpdatedAt).getTime() : Date.now() }; } return item; });
+      const nextCafe = cafe.map((item) => { const remote = cloud.get(String(item.id)); if (remote?.module === "cafe" && remote.note && remote.note !== item.note) { count += 1; return { ...item, note: remote.note, noteUpdatedAt: remote.noteUpdatedAt || new Date().toISOString() }; } return item; });
       write(JOURNAL_KEY, JSON.stringify(nextJournal));
       write(TIME_WHEEL_HISTORY_KEY, JSON.stringify(nextTimeWheel));
+      write(CAFE_RECORDS_KEY, JSON.stringify(nextCafe));
       setMessage(count ? \`已收取 ${'${count}'} 条新回复。💌\` : "暂时没有新的 AI 回复。");
     } catch (error) { setMessage(error instanceof Error ? error.message : "收取失败"); }
   }
@@ -154,7 +172,7 @@ replace(
 
 replace(
   '<div><span>日记藏页</span><strong>{journalCount} 篇</strong></div>\n              <div><span>云端状态</span>',
-  '<div><span>日记藏页</span><strong>{journalCount} 篇</strong></div>\n              <div><span>时光记录</span><strong>{timeWheelCount} 条</strong></div>\n              <div><span>云端状态</span>',
+  '<div><span>日记藏页</span><strong>{journalCount} 篇</strong></div>\n              <div><span>时光记录</span><strong>{timeWheelCount} 条</strong></div>\n              <div><span>咖啡馆剧场</span><strong>{cafeCount} 篇</strong></div>\n              <div><span>云端状态</span>',
 );
 
 replace(

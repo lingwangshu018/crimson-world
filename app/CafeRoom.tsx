@@ -39,6 +39,7 @@ const READ_KEY = "crimson-tavern.vault-read-key.v1";
 const REPLY_KEY = "crimson-tavern.vault-note-key.v1";
 const API_URL_KEY = "crimson-world.vault-api-url.v1";
 const DEFAULT_API_URL = "https://crimson-tavern.boarder-72pound.chatgpt.site/api/vault";
+const KEY_PATTERN = /^ctv1_[A-Za-z0-9_-]{43}$/;
 
 const cupLabels: Record<CupSize, { name: string; hint: string }> = {
   espresso: { name: "Espresso", hint: "短片段 · 约 600 字" },
@@ -72,6 +73,32 @@ const randomTitles = [
 function makeId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return `cafe-${crypto.randomUUID()}`;
   return `cafe-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function createSharedVaultKey() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
+  return `ctv1_${window.btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "")}`;
+}
+
+function ensureSharedVaultKeys() {
+  let ownerKey = localStorage.getItem(OWNER_KEY) || "";
+  let readKey = localStorage.getItem(READ_KEY) || "";
+  let replyKey = localStorage.getItem(REPLY_KEY) || "";
+
+  if (!KEY_PATTERN.test(ownerKey)) ownerKey = createSharedVaultKey();
+  if (!KEY_PATTERN.test(readKey) || readKey === ownerKey) {
+    readKey = createSharedVaultKey();
+  }
+  if (!KEY_PATTERN.test(replyKey) || replyKey === ownerKey || replyKey === readKey) {
+    replyKey = createSharedVaultKey();
+  }
+
+  localStorage.setItem(OWNER_KEY, ownerKey);
+  localStorage.setItem(READ_KEY, readKey);
+  localStorage.setItem(REPLY_KEY, replyKey);
+  return { ownerKey, readKey, replyKey };
 }
 
 function formatDate(value: string) {
@@ -201,8 +228,7 @@ export default function CafeRoom() {
   }
 
   async function sendToAI(record: CafeRecord) {
-    const readKey = localStorage.getItem(READ_KEY) || "未配置";
-    const replyKey = localStorage.getItem(REPLY_KEY) || "未配置";
+    const { readKey, replyKey } = ensureSharedVaultKeys();
     const text = `请完成我的绯界咖啡馆小剧场订单。\n\n模块：绯界咖啡馆\n\n【记录编号】\nCF-${String(records.findIndex((item) => item.id === record.id) + 1).padStart(4, "0")}\n\n【记录ID】\n${record.id}\n\n【读取钥匙】\n${readKey}\n\n【回复钥匙】\n${replyKey}\n\n【内部演绎协议】\n先读取并理解当前会话或运行环境中已经加载的世界书、角色卡、人物设定、关系设定及近期记忆。世界书决定时代、地点、规则与背景；角色卡决定性格、身份、语言与行为逻辑；近期记忆决定当前关系、已有经历与剧情进度。请在不破坏原设定的前提下完成演绎，直接输出正文，不展示分析过程、提示词或设定摘要。\n\n【本次剧场订单】\n标题：${record.title}\n核心设定：${record.premise}\n必须出现：${record.mustInclude || "无额外要求"}\n避免出现：${record.avoid || "无额外限制"}\n故事味道：${record.flavour}\n杯型：${cupLabels[record.cupSize].name}（${cupLabels[record.cupSize].hint}）\n叙事偏好：${record.narrative}\n\n请根据世界书、角色卡及近期记忆演绎本次小剧场，直接输出完整正文。\n\n若读取钥匙和回复钥匙可用：请读取这一条记录，并在完成后使用回复钥匙把完整正文写回本条记录的 note 字段。\n若钥匙显示“未配置”：请直接根据上面的完整订单演绎并在当前聊天中输出正文。\n\n不要修改原记录，不要创建新记录，不要回复其他记录，只处理这一条。`;
     try {
       await navigator.clipboard.writeText(text);
