@@ -32,7 +32,9 @@ export function RoomIcon({ roomId, size, variant = "map" }: RoomIconProps) {
         flexShrink: 0,
         fontSize: `${iconSize * fontScale}px`,
         lineHeight: 1,
-        transform: "none",
+        textAlign: "center",
+        fontFamily: '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif',
+        transform: "translateY(-0.05em)",
       }}
     >
       {icon}
