@@ -16,6 +16,7 @@ const patches = [
   { file: "apply-cloud-journal-archive.mjs", label: "cloud journal archive" },
   { file: "apply-unified-cloud-archive.mjs", label: "unified cloud archive" },
   { file: "apply-assistive-cloud-menu.mjs", label: "cloud assistive menu" },
+  { file: "apply-cloud-orb-body-portal.mjs", label: "global cloud orb portal" },
   // This is a compatibility polish. A changed selector must not block every room build.
   { file: "apply-static-world-trigger.mjs", label: "static world trigger", optional: true },
   { file: "apply-time-wheel-ai-tools.mjs", label: "time wheel AI read reply and locate" },
