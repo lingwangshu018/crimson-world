@@ -6,29 +6,33 @@ type RoomIconProps = {
   variant?: "map" | "sidebar";
 };
 
-const roomIconMap: Partial<Record<RoomId, string>> = {
-  tavern: "/assets/map-icons/crimson-tavern.png",
-  cafe: "/assets/map-icons/crimson-cafe.png",
-  journal: "/assets/map-icons/journal-room.png",
-  wheel: "/assets/map-icons/wheel-of-time.png",
-  study: "/assets/map-icons/study-rooms.png",
+const roomIconMap: Record<RoomId, string> = {
+  tavern: "🍷",
+  cafe: "☕",
+  journal: "📖",
+  wheel: "⏳",
+  study: "📚",
 };
 
 export function RoomIcon({ roomId, size, variant = "map" }: RoomIconProps) {
-  const src = roomIconMap[roomId] ?? "/assets/map-icons/unknown.png";
-  const iconSize = size ?? (variant === "sidebar" ? 48 : 88);
+  const icon = roomIconMap[roomId] ?? "✦";
+  const iconSize = size ?? (variant === "sidebar" ? 36 : 64);
 
   return (
-    <img
-      src={src}
-      alt=""
+    <span
       aria-hidden="true"
       className={`world-map-room-icon icon-${variant}`}
       style={{
         width: `${iconSize}px`,
         height: `${iconSize}px`,
-        objectFit: "contain",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: `${iconSize * 0.55}px`,
+        lineHeight: 1,
       }}
-    />
+    >
+      {icon}
+    </span>
   );
 }
