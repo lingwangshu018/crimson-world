@@ -273,7 +273,17 @@ export default function CafeRoom() {
   }
 
   return (
-    <section id="cafe" className="cafe-room">
+    <section
+      id="cafe"
+      className="cafe-room"
+      style={{
+        backgroundImage:
+          'linear-gradient(180deg, rgba(247,240,229,.64), rgba(239,226,208,.82)), url("images/crimson-cafe-background.webp")',
+        backgroundPosition: "center top",
+        backgroundSize: "cover",
+        backgroundAttachment: "fixed",
+      }}
+    >
       <div className={`cafe-toast ${toast ? "show" : ""}`}>{toast}</div>
       <header className="cafe-hero">
         <div>
