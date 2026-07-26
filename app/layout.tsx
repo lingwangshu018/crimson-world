@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./room-backgrounds.css";
-import { OpeningScene } from "./OpeningScene";
 import { TavernLife } from "./TavernLife";
 import { CloudCellar } from "./CloudCellar";
 
@@ -28,7 +27,6 @@ export default function RootLayout({
         <meta name="theme-color" content="#100709" />
       </head>
       <body>
-        <OpeningScene />
         <TavernLife />
         <CloudCellar />
         {children}
