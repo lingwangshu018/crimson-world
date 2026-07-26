@@ -51,7 +51,7 @@ if (!wheel.includes(titleMarker)) {
 .header-title span { width: 92px; height: 1px; margin-top: 9px; background: linear-gradient(90deg, transparent, rgba(173, 126, 65, .72), transparent); }
 .header .add-btn { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); }
 .header .add-btn:active { transform: translateY(-50%) scale(.85); }
-@keyframes crimson-title-reveal { from { opacity: 0; } to { opacity: 1; }
+@keyframes crimson-title-reveal { from { opacity: 0; } to { opacity: 1; } }
 @keyframes crimson-time-halo { 0%, 100% { opacity: .5; transform: scale(.94); } 50% { opacity: 1; transform: scale(1.04); } }
 @media (max-width: 480px) { .header { min-height: 72px; padding-right: 58px; padding-left: 58px; } .header-title strong { font-size: 18px; letter-spacing: .25em; text-indent: .25em; } .header-title::before { width: 70px; height: 70px; } }
 @media (prefers-reduced-motion: reduce) { .header-title, .header-title::before { animation: none; } }
