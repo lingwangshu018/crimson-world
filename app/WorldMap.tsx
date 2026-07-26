@@ -1,7 +1,12 @@
 "use client";
 
 import { RoomIcon } from "./RoomIcon";
-import { getVisibleRooms, type RoomDefinition, type RoomId } from "./room-registry";
+import {
+  getVisibleRooms,
+  type RoomDefinition,
+  type RoomId,
+  type RoomStatus,
+} from "./room-registry";
 
 type WorldMapProps = {
   open: boolean;
@@ -9,6 +14,10 @@ type WorldMapProps = {
   onClose: () => void;
   onSelect: (room: RoomDefinition) => void;
 };
+
+function isPlannedRoom(status: RoomStatus) {
+  return status === "planned";
+}
 
 export function WorldMap({ open, active, onClose, onSelect }: WorldMapProps) {
   const rooms = getVisibleRooms();
@@ -28,19 +37,22 @@ export function WorldMap({ open, active, onClose, onSelect }: WorldMapProps) {
         <div className="world-map-road road-vertical" aria-hidden="true" />
         <div className="world-map-road road-horizontal" aria-hidden="true" />
 
-        {rooms.map((room) => (
-          <button
-            className={`world-map-node theme-${room.theme} ${active === room.id ? "is-active" : ""} ${room.status === "planned" ? "is-planned" : ""}`}
-            style={{ left: `${room.map.x}%`, top: `${room.map.y}%` }}
-            type="button"
-            key={room.id}
-            onClick={() => onSelect(room)}
-            aria-label={`${room.name}${room.status === "planned" ? "，布置中" : ""}`}
-          >
-            <span className="world-map-building"><RoomIcon roomId={room.id} /></span>
-            <span className="world-map-label"><strong>{room.name}</strong><small>{room.status === "ready" ? "可进入" : "布置中"}</small></span>
-          </button>
-        ))}
+        {rooms.map((room) => {
+          const planned = isPlannedRoom(room.status);
+          return (
+            <button
+              className={`world-map-node theme-${room.theme} ${active === room.id ? "is-active" : ""} ${planned ? "is-planned" : ""}`}
+              style={{ left: `${room.map.x}%`, top: `${room.map.y}%` }}
+              type="button"
+              key={room.id}
+              onClick={() => onSelect(room)}
+              aria-label={`${room.name}${planned ? "，布置中" : ""}`}
+            >
+              <span className="world-map-building"><RoomIcon roomId={room.id} /></span>
+              <span className="world-map-label"><strong>{room.name}</strong><small>{planned ? "布置中" : "可进入"}</small></span>
+            </button>
+          );
+        })}
       </div>
 
       <footer className="world-map-legend">
