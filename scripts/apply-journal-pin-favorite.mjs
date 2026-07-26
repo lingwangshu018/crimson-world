@@ -2,8 +2,8 @@ import fs from "node:fs";
 
 const componentPath = new URL("../app/JournalRoom.tsx", import.meta.url);
 const stylePath = new URL("../app/journal-room.css", import.meta.url);
-let source = fs.readFileSync(componentPath, "utf8");
-let styles = fs.readFileSync(stylePath, "utf8");
+let source = fs.readFileSync(componentPath, "utf8").replace(/\r\n/g, "\n");
+let styles = fs.readFileSync(stylePath, "utf8").replace(/\r\n/g, "\n");
 
 if (source.includes("CRIMSON_JOURNAL_PIN_FAVORITE")) process.exit(0);
 
