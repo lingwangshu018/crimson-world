@@ -51,6 +51,19 @@
   margin: 18px auto 0;
 }
 
+.travel-data-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 28px;
+  margin: 24px auto;
+  width: 100%;
+}
+
+.travel-data-actions button {
+  min-width: 120px;
+}
+
 .travel-rabbit-card h2 {
   color: #d7b46a;
 }
