@@ -23,6 +23,10 @@ export function saveTravelRecord(record: TravelRecord) {
   );
 }
 
+export function createTravelRecord(record: TravelRecord) {
+  saveTravelRecord(record);
+}
+
 export function exportTravelRecords() {
   return JSON.stringify(readTravelRecords(), null, 2);
 }
