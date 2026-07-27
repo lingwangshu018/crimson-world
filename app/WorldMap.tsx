@@ -24,6 +24,7 @@ type WorldMapProps = {
   onClose: () => void;
   onSelect: (room: RoomDefinition) => void;
   onOpenCloud: () => void;
+  onOpenLibrary: () => void;
 };
 
 const EMPTY_PROGRESS: WorldProgress = {
@@ -37,7 +38,7 @@ function isPlannedRoom(status: RoomStatus) {
   return status === "planned";
 }
 
-export function WorldMap({ open, active, onClose, onSelect, onOpenCloud }: WorldMapProps) {
+export function WorldMap({ open, active, onClose, onSelect, onOpenCloud, onOpenLibrary }: WorldMapProps) {
   const rooms = getVisibleRooms();
   const roomById = useMemo(
     () => new Map<RoomId, RoomDefinition>(rooms.map((room) => [room.id, room] as const)),
@@ -66,6 +67,16 @@ export function WorldMap({ open, active, onClose, onSelect, onOpenCloud }: World
   function enterNode(node: WorldMapNode) {
     if (node.kind === "core") {
       onOpenCloud();
+      return;
+    }
+    if (node.kind === "portal" && node.id === "library") {
+      if (entering) return;
+      setEntering(node.id);
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.setTimeout(() => {
+        onOpenLibrary();
+        setEntering(null);
+      }, reduceMotion ? 0 : 650);
       return;
     }
     if (!node.roomId || entering) return;
@@ -102,6 +113,7 @@ export function WorldMap({ open, active, onClose, onSelect, onOpenCloud }: World
         <svg className="world-map-paths" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <path d="M50 47 C50 34 50 27 50 15" />
           <path d="M50 47 C39 46 31 46 22 46" />
+          <path d="M50 47 C35 35 26 27 18 20" />
           <path d="M50 47 C61 45 69 44 78 43" />
           <path d="M50 47 C61 57 67 64 72 72" />
           <path d="M50 47 C43 58 37 67 31 74" />
@@ -111,10 +123,11 @@ export function WorldMap({ open, active, onClose, onSelect, onOpenCloud }: World
         {worldMapNodes.map((node) => {
           const room = node.roomId ? roomById.get(node.roomId) : undefined;
           const planned = room ? isPlannedRoom(room.status) : false;
-          const unlocked = isWorldNodeUnlocked(node, progress) && !planned;
+          const unlocked = node.kind === "portal" || (isWorldNodeUnlocked(node, progress) && !planned);
           const unlockProgress = worldUnlockProgress(node, progress);
           const activeNode = node.roomId === active;
           const isCore = node.kind === "core";
+          const isPortal = node.kind === "portal";
           const coreSubtitle = cloudState === "ready"
             ? "云端已连接 · 打开控制中心"
             : cloudState === "partial"
@@ -131,17 +144,19 @@ export function WorldMap({ open, active, onClose, onSelect, onOpenCloud }: World
 
           return (
             <button
-              className={`world-map-node ${room ? `theme-${room.theme}` : ""} is-${node.kind} ${activeNode ? "is-active" : ""} ${planned ? "is-planned" : ""} ${unlocked ? "" : "is-locked"} ${entering === node.id ? "is-entering" : ""}`}
+              className={`world-map-node ${room ? `theme-${room.theme}` : isPortal ? "theme-library" : ""} is-${node.kind} ${activeNode ? "is-active" : ""} ${planned ? "is-planned" : ""} ${unlocked ? "" : "is-locked"} ${entering === node.id ? "is-entering" : ""}`}
               style={style}
               type="button"
               key={node.id}
               onClick={() => enterNode(node)}
-              disabled={(!node.roomId && !isCore) || !unlocked || Boolean(entering)}
+              disabled={(!node.roomId && !isCore && !isPortal) || !unlocked || Boolean(entering)}
               aria-label={isCore ? `绯界核心，${coreSubtitle}` : `${node.name}，${unlocked ? node.subtitle : node.unlock?.label || "布置中"}`}
             >
               <span className="world-map-building">
                 {node.roomId ? <RoomIcon roomId={node.roomId} /> : node.kind === "core" ? (
                   <CrimsonCoreIcon />
+                ) : isPortal ? (
+                  <span className="world-map-library-icon" aria-hidden="true">📚</span>
                 ) : (
                   <img src="/assets/map-icons/unknown.png" alt="" aria-hidden="true" className="world-map-special-icon" />
                 )}
@@ -151,6 +166,7 @@ export function WorldMap({ open, active, onClose, onSelect, onOpenCloud }: World
                 <em>{node.english}</em>
                 <small>{isCore ? coreSubtitle : unlocked ? node.subtitle : node.unlock?.label || "布置中"}</small>
                 {isCore ? <span className={`world-core-status is-${cloudState}`}><i />{cloudState === "ready" ? "已连接" : cloudState === "partial" ? "待完善" : "未配置"}</span> : null}
+                {isPortal ? <span className="world-library-status"><i />馆藏开放</span> : null}
                 {unlockProgress ? (
                   <span className="world-map-progress" aria-label={`${unlockProgress.current}/${unlockProgress.target}`}>
                     <b>{unlockProgress.current}</b><i /><b>{unlockProgress.target}</b>
