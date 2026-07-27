@@ -16,6 +16,7 @@ export default defineConfig({
       input: {
         main: resolve(process.cwd(), "github-pages/index.html"),
         library: resolve(process.cwd(), "github-pages/library.html"),
+        rabbitRig: resolve(process.cwd(), "github-pages/rabbit-rig.html"),
       },
     },
   },
