@@ -30,3 +30,12 @@ export function createTravelRecord(record: TravelRecord) {
 export function exportTravelRecords() {
   return JSON.stringify(readTravelRecords(), null, 2);
 }
+
+export function importTravelRecords(records: TravelRecord[]) {
+  if (typeof window === "undefined") return;
+
+  window.localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(records),
+  );
+}
