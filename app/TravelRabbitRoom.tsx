@@ -1,4 +1,4 @@
-"use client";
+use client";
 
 import { useRef, useState } from "react";
 import {
@@ -16,14 +16,58 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
   const inputRef = useRef<HTMLInputElement>(null);
 
   function refreshHistory() {
-    setHistory(readTravelRecords());
-    setRecord(readTravelRecords()[0] ?? null);
+    const records = readTravelRecords();
+    setHistory(records);
+    setRecord(records[0] ?? null);
   }
 
   function beginTravel() {
     const result = startTravel();
     createTravelRecord(result);
     refreshHistory();
+  }
+
+  function buildAiLetterPrompt() {
+    if (!record) return "请先让旅行小兔完成一次旅行。";
+
+    return `请读取我的旅行小兔记录，并继续完成这次旅行。
+
+【旅行编号】
+${record.id}
+
+【目的地】
+${record.continent} · ${record.city}
+
+【地点】
+${record.location}
+
+【遇见】
+${record.encounter.join("、")}
+
+【发现】
+${record.discoveries.join("、")}
+
+【带回】
+${record.souvenirs.join("、")}
+
+【品尝】
+${record.food.join("、")}
+
+请根据绯界世界设定，为小兔写一封旅行手记。`;
+  }
+
+  async function sendToAI() {
+    const text = buildAiLetterPrompt();
+    try {
+      await navigator.clipboard.writeText(text);
+      alert("旅行信件指令已复制，请发送给 AI。");
+    } catch {
+      alert(text);
+    }
+  }
+
+  function receiveNewNote() {
+    alert("收取新手记接口已预留，将接入绯界统一 AI 回复协议。");
   }
 
   function handleExport() {
@@ -75,8 +119,8 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
         ) : <p>今天还没有旅行记录。</p>}
 
         <div className="travel-letter-actions">
-          <button type="button">📨 发送给 AI</button>
-          <button type="button">📬 收取新手记</button>
+          <button type="button" onClick={sendToAI}>📨 发送给 AI</button>
+          <button type="button" onClick={receiveNewNote}>📬 收取新手记</button>
         </div>
       </section>
 
@@ -93,16 +137,10 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
       </section>
 
       <section className="travel-data-actions">
-        <input
-          ref={inputRef}
-          hidden
-          type="file"
-          accept="application/json"
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            if (file) handleImport(file);
-          }}
-        />
+        <input ref={inputRef} hidden type="file" accept="application/json" onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) handleImport(file);
+        }} />
         <button type="button" onClick={() => inputRef.current?.click()}>导入记录</button>
         <button type="button" onClick={handleExport}>导出记录</button>
       </section>
