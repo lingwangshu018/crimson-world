@@ -1,0 +1,108 @@
+{
+  "canvas": {
+    "width": 720,
+    "height": 900
+  },
+  "layers": [
+    {
+      "id": "ear-left",
+      "file": "ear-left.webp",
+      "x": 185,
+      "y": 45,
+      "scale": 0.48,
+      "rotate": -5,
+      "z": 1
+    },
+    {
+      "id": "ear-right",
+      "file": "ear-right.webp",
+      "x": 360,
+      "y": 42,
+      "scale": 0.48,
+      "rotate": 5,
+      "z": 1
+    },
+    {
+      "id": "body",
+      "file": "body.webp",
+      "x": 252,
+      "y": 165,
+      "scale": 0.78,
+      "rotate": 0,
+      "z": 2
+    },
+    {
+      "id": "cape",
+      "file": "cape.webp",
+      "x": 95,
+      "y": 300,
+      "scale": 0.78,
+      "rotate": 0,
+      "z": 3
+    },
+    {
+      "id": "bow",
+      "file": "bow.webp",
+      "x": 235,
+      "y": 330,
+      "scale": 0.38,
+      "rotate": 0,
+      "z": 4
+    },
+    {
+      "id": "eyes-open",
+      "file": "eyes-open.webp",
+      "x": 245,
+      "y": 258,
+      "scale": 0.37,
+      "rotate": 0,
+      "z": 5
+    },
+    {
+      "id": "eyes-closed",
+      "file": "eyes-closed.webp",
+      "x": 240,
+      "y": 278,
+      "scale": 0.37,
+      "rotate": 0,
+      "z": 6,
+      "hidden": true
+    },
+    {
+      "id": "monocle",
+      "file": "monocle.webp",
+      "x": 388,
+      "y": 240,
+      "scale": 0.23,
+      "rotate": 0,
+      "z": 7
+    },
+    {
+      "id": "hat",
+      "file": "hat.webp",
+      "x": 330,
+      "y": 120,
+      "scale": 0.42,
+      "rotate": -8,
+      "z": 8
+    },
+    {
+      "id": "book",
+      "file": "book.webp",
+      "x": 125,
+      "y": 475,
+      "scale": 0.46,
+      "rotate": -8,
+      "z": 9
+    },
+    {
+      "id": "watch",
+      "file": "watch.webp",
+      "x": 370,
+      "y": 475,
+      "scale": 0.34,
+      "rotate": 0,
+      "z": 10
+    }
+  ]
+}
