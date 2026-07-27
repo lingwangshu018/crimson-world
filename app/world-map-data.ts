@@ -1,6 +1,6 @@
 import type { RoomId } from "./room-registry";
 
-export type WorldNodeKind = "core" | "room" | "mystery";
+export type WorldNodeKind = "core" | "room" | "portal" | "mystery";
 export type WorldUnlockMetric = "cafeStories" | "diaries" | "timeRecords" | "totalMemories";
 
 export type WorldUnlockRule = {
@@ -44,6 +44,16 @@ export const worldMapNodes: readonly WorldMapNode[] = [
     description: "收藏日记、回信，以及尚未说完的心事。",
     icon: "书",
     position: { x: 22, y: 46 },
+  },
+  {
+    id: "library",
+    kind: "portal",
+    name: "皇家图书馆",
+    english: "ROYAL LIBRARY",
+    subtitle: "兔兔馆长正在书架间等你",
+    description: "翻阅世界书，进入编纂室，为绯界续写新的历史。",
+    icon: "📚",
+    position: { x: 18, y: 20 },
   },
   {
     id: "core",
