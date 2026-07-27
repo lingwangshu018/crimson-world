@@ -16,6 +16,7 @@ const sidebarNames: Record<RoomId, string> = {
   journal: "日记本",
   wheel: "时光之轮",
   study: "自习室",
+  "travel-rabbit": "旅行小兔",
 };
 
 export function WorldNav() {
