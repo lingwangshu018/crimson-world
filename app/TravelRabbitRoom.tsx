@@ -1,19 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import { createTravelRecord, readTravelRecords } from "./travel-rabbit/travel-storage";
+import { useRef, useState } from "react";
+import {
+  createTravelRecord,
+  exportTravelRecords,
+  importTravelRecords,
+  readTravelRecords,
+} from "./travel-rabbit/travel-storage";
 import { startTravel } from "./travel-rabbit/travel-engine";
 import "./travel-rabbit.css";
 
 export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) {
   const [record, setRecord] = useState(() => readTravelRecords()[0] ?? null);
   const [history, setHistory] = useState(() => readTravelRecords());
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function refreshHistory() {
+    setHistory(readTravelRecords());
+    setRecord(readTravelRecords()[0] ?? null);
+  }
 
   function beginTravel() {
     const result = startTravel();
     createTravelRecord(result);
-    setRecord(result);
-    setHistory(readTravelRecords());
+    refreshHistory();
+  }
+
+  function handleExport() {
+    const blob = new Blob([exportTravelRecords()], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "travel-rabbit-records.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleImport(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const records = JSON.parse(String(reader.result));
+        if (Array.isArray(records)) {
+          importTravelRecords(records);
+          refreshHistory();
+        }
+      } catch {
+        return;
+      }
+    };
+    reader.readAsText(file);
   }
 
   return (
@@ -36,9 +72,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
             <p>🎁 带回：{record.souvenirs.join("、")}</p>
             <p>🍰 品尝：{record.food.join("、")}</p>
           </div>
-        ) : (
-          <p>今天还没有旅行记录。</p>
-        )}
+        ) : <p>今天还没有旅行记录。</p>}
 
         <div className="travel-letter-actions">
           <button type="button">📨 发送给 AI</button>
@@ -59,8 +93,18 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
       </section>
 
       <section className="travel-data-actions">
-        <button type="button">导入记录</button>
-        <button type="button">导出记录</button>
+        <input
+          ref={inputRef}
+          hidden
+          type="file"
+          accept="application/json"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) handleImport(file);
+          }}
+        />
+        <button type="button" onClick={() => inputRef.current?.click()}>导入记录</button>
+        <button type="button" onClick={handleExport}>导出记录</button>
       </section>
 
       {onClose ? <button type="button" className="travel-back" onClick={onClose}>返回绯界</button> : null}
