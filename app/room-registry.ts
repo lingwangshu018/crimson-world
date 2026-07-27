@@ -1,6 +1,6 @@
 export type RoomStatus = "ready" | "planned";
-export type RoomRenderer = "native" | "cafe" | "journal" | "wheel" | "study" | "preview";
-export type RoomTheme = "tavern" | "daylight" | "paper" | "bronze" | "library";
+export type RoomRenderer = "native" | "cafe" | "journal" | "wheel" | "study" | "travel-rabbit" | "preview";
+export type RoomTheme = "tavern" | "daylight" | "paper" | "bronze" | "library" | "travel";
 
 type RoomCapabilities = {
   memory: boolean;
@@ -48,6 +48,18 @@ export const roomRegistry = [
     renderer: "journal",
     theme: "paper",
     map: { x: 28, y: 62 },
+    capabilities: { memory: true, cloud: true, timeline: true },
+  },
+  {
+    id: "travel-rabbit",
+    icon: "🐰",
+    name: "旅行小兔",
+    english: "THE TRAVEL RABBIT",
+    description: "带着好奇出发，把远方的故事带回来",
+    status: "ready",
+    renderer: "travel-rabbit",
+    theme: "travel",
+    map: { x: 88, y: 68 },
     capabilities: { memory: true, cloud: true, timeline: true },
   },
   {
