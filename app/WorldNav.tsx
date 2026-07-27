@@ -87,6 +87,12 @@ export function WorldNav() {
     setMapOpen(true);
   };
 
+  const openLibrary = () => {
+    setOpen(false);
+    setMapOpen(false);
+    window.location.assign(new URL("library.html", window.location.href).href);
+  };
+
   return (
     <>
       <CloudCellar />
@@ -105,9 +111,15 @@ export function WorldNav() {
               <span className="world-space-copy"><strong>{sidebarNames[space.id]}</strong><small>{space.english}</small><em>{space.description}</em></span>
             </button>
           ))}
+          <button className="world-library-entry" type="button" onClick={openLibrary}>
+            <span className="world-space-index">{String(roomRegistry.length + 1).padStart(2, "0")}</span>
+            <span className="world-space-icon world-library-icon" aria-hidden="true">📚</span>
+            <span className="world-space-copy"><strong>皇家图书馆</strong><small>ROYAL LIBRARY</small><em>翻阅世界书，与兔兔馆长一起编纂绯界</em></span>
+            <span className="world-space-arrow" aria-hidden="true">→</span>
+          </button>
         </nav>
       </aside>
-      <WorldMap open={mapOpen} active={active} onClose={() => setMapOpen(false)} onSelect={selectSpace} onOpenCloud={() => {}} />
+      <WorldMap open={mapOpen} active={active} onClose={() => setMapOpen(false)} onSelect={selectSpace} onOpenCloud={() => {}} onOpenLibrary={openLibrary} />
       <div className="world-active-room"><WorldRoomOutlet active={active} onClose={() => setPreviousActive(null)} /></div>
     </>
   );
