@@ -8,6 +8,7 @@ import { WorldRoomOutlet } from "./WorldRoomOutlet";
 import { roomRegistry, type RoomDefinition, type RoomId } from "./room-registry";
 import "./world-nav.css";
 import "./gpt-mobile-nav.css";
+import "./library-world-entry.css";
 
 const sidebarNames: Record<RoomId, string> = {
   tavern: "酒馆",
