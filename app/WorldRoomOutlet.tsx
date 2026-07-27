@@ -5,6 +5,7 @@ import CafeRoom from "./CafeRoom";
 import { JournalRoom } from "./JournalRoom";
 import { StudyRoom } from "./StudyRoom";
 import { TimeWheelRoom } from "./TimeWheelRoom";
+import TravelRabbitRoom from "./TravelRabbitRoom";
 import { getRoom, type RoomId, type RoomRenderer } from "./room-registry";
 
 type RoomComponentProps = {
@@ -16,6 +17,7 @@ const roomRenderers: Partial<Record<RoomRenderer, ComponentType<RoomComponentPro
   journal: JournalRoom,
   wheel: TimeWheelRoom,
   study: StudyRoom,
+  "travel-rabbit": TravelRabbitRoom,
 };
 
 type WorldRoomOutletProps = {
