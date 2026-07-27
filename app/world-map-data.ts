@@ -88,6 +88,17 @@ export const worldMapNodes: readonly WorldMapNode[] = [
     position: { x: 72, y: 72 },
   },
   {
+    id: "travel-rabbit",
+    kind: "room",
+    roomId: "travel-rabbit",
+    name: "旅行小兔",
+    english: "THE TRAVEL RABBIT",
+    subtitle: "带着好奇出发，把远方的故事带回来",
+    description: "跟随小兔踏上旅途，探索绯界中的城市、自然与文明，并收藏每一次相遇留下的记忆。",
+    icon: "🐰",
+    position: { x: 88, y: 68 },
+  },
+  {
     id: "study",
     kind: "room",
     roomId: "study",
