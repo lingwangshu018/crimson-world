@@ -1,0 +1,102 @@
+.world-library-entry {
+  position: relative;
+  overflow: hidden;
+}
+
+.world-library-entry::after {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold-bright);
+  box-shadow: 0 0 12px rgba(241, 217, 166, 0.9);
+  content: "";
+  animation: library-entry-glow 2.4s ease-in-out infinite;
+}
+
+.world-library-icon {
+  font-size: 19px;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255,255,255,.12), transparent 35%),
+    linear-gradient(145deg, rgba(77, 54, 111, .46), rgba(40, 21, 52, .86));
+}
+
+.world-map-home .world-map-node.is-portal {
+  cursor: pointer;
+}
+
+.world-map-home .world-map-node.is-portal .world-map-building {
+  width: 70px;
+  height: 70px;
+  border-color: rgba(218, 190, 130, .55);
+  background:
+    radial-gradient(circle at 45% 30%, rgba(255,255,255,.13), transparent 34%),
+    linear-gradient(155deg, rgba(82, 57, 116, .88), rgba(29, 15, 42, .98));
+  box-shadow:
+    0 0 34px rgba(151, 111, 190, .2),
+    inset 0 0 24px rgba(255,255,255,.035);
+  animation: library-map-float 4.2s ease-in-out infinite;
+}
+
+.world-map-home .world-map-node.is-portal:hover .world-map-building,
+.world-map-home .world-map-node.is-portal:focus-visible .world-map-building {
+  border-color: var(--map-gold);
+  box-shadow:
+    0 0 50px rgba(215,184,117,.32),
+    0 0 26px rgba(151,111,190,.28),
+    inset 0 0 24px rgba(255,255,255,.06);
+}
+
+.world-map-library-icon {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  font-size: 30px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.45));
+}
+
+.world-library-status {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  margin-top: 6px;
+  color: #d9c58c;
+  font-size: 8px;
+  letter-spacing: .1em;
+}
+
+.world-library-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c8b56f;
+  box-shadow: 0 0 12px rgba(200,181,111,.8);
+}
+
+@keyframes library-entry-glow {
+  50% { opacity: .38; transform: scale(.7); }
+}
+
+@keyframes library-map-float {
+  50% { transform: translateY(-5px) rotate(-1deg); }
+}
+
+@media (max-width: 760px) {
+  .world-map-home .world-map-node.is-portal .world-map-building {
+    width: 58px;
+    height: 58px;
+  }
+
+  .world-map-library-icon { font-size: 25px; }
+  .world-library-status { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-library-entry::after,
+  .world-map-home .world-map-node.is-portal .world-map-building {
+    animation: none;
+  }
+}
