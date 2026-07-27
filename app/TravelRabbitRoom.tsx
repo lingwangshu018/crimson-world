@@ -29,10 +29,10 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
           <div>
             <p>目的地：{record.continent} · {record.city}</p>
             <p>地点：{record.location}</p>
-            <p>遇见：{record.encounter}</p>
-            <p>发现：{record.discoveries}</p>
-            <p>带回：{record.souvenir}</p>
-            <p>品尝：{record.food}</p>
+            <p>遇见：{record.encounter.join("、")}</p>
+            <p>发现：{record.discoveries.join("、")}</p>
+            <p>带回：{record.souvenirs.join("、")}</p>
+            <p>品尝：{record.food.join("、")}</p>
           </div>
         ) : (
           <p>今天还没有旅行记录。</p>
@@ -41,7 +41,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
 
       <section className="rabbit-gifts-card">
         <h2>小兔带回来的东西</h2>
-        <p>{record?.souvenir ?? "旅行收获会显示在这里。"}</p>
+        <p>{record?.souvenirs.join("、") ?? "旅行收获会显示在这里。"}</p>
       </section>
 
       <section className="letter-actions">
