@@ -16,7 +16,7 @@ function randomItem<T>(items: readonly T[]) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-export function createTravelRecord(): TravelRecord {
+export function startTravel(): TravelRecord {
   const place = randomItem(samplePlaces);
 
   return {
@@ -32,3 +32,5 @@ export function createTravelRecord(): TravelRecord {
     memory: "小兔带着好奇出发，在远方留下了一段新的记忆。",
   };
 }
+
+export const createTravelRecord = startTravel;
