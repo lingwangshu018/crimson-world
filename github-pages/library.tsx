@@ -54,7 +54,7 @@ const books: Book[] = [
   {
     title: "城市馆导览",
     section: "cities",
-    path: "docs/world/Cities/xiting.md",
+    path: "docs/world/Cities/README.md",
     summary: "城市、街区、建筑和居民生活的记录入口。",
     status: "馆藏",
   },
