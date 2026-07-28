@@ -18,4 +18,6 @@ export type TravelRecord = {
   souvenirs: string[];
   memory: string;
   note?: string;
+  noteUpdatedAt?: string | null;
+  vaultSyncedAt?: string | null;
 };
