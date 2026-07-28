@@ -93,7 +93,7 @@ export default {
       setWishAdminCredentials(env.WISH_ADMIN_USER, env.WISH_ADMIN_PASSWORD);
       switch (method) {
         case "OPTIONS": return wishesOPTIONS();
-        case "GET": return wishesGET();
+        case "GET": return wishesGET(request);
         case "POST": return wishesPOST(request);
         case "PATCH": return wishesPATCH(request);
         case "DELETE": return wishesDELETE(request);
