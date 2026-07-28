@@ -41,6 +41,7 @@ const patches = [
   { file: "apply-time-wheel-html-write-guard.mjs", label: "time wheel HTML reply validation" },
   { file: "apply-cafe-order-backups.mjs", label: "cafe order backups" },
   { file: "apply-cafe-room.mjs", label: "standalone Crimson Cafe room" },
+  { file: "apply-cafe-restore-front.mjs", label: "restore cafe landing and workshop order" },
   { file: "apply-cafe-tavern-layout-fixes.mjs", label: "tavern-style cafe archive layout" },
   { file: "apply-strict-room-isolation.mjs", label: "strict room isolation" },
   { file: "apply-tavern-delete-actions.mjs", label: "separate tavern note and record deletion" },
