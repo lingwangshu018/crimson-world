@@ -15,6 +15,7 @@ const patches = [
   { file: "apply-journal-reader-toolbar.mjs", label: "compact journal reader toolbar" },
   { file: "apply-cloud-orb-top-layer.mjs", label: "cloud orb layer" },
   { file: "apply-cloud-journal-archive.mjs", label: "cloud journal archive" },
+  { file: "prepare-cloud-endpoint-patches.mjs", label: "Worker cloud endpoint preparation" },
   { file: "apply-unified-cloud-archive.mjs", label: "unified cloud archive" },
   { file: "apply-assistive-cloud-menu.mjs", label: "cloud assistive menu" },
   { file: "apply-cloud-orb-body-portal.mjs", label: "global cloud orb portal" },
@@ -79,5 +80,3 @@ for (const patch of patches) {
   console.error(`✗ Required patch failed: ${patch.label}`);
   process.exit(result.status || 1);
 }
-
-console.log("\n✓ Crimson World UI patches complete.\n");
