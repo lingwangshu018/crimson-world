@@ -51,6 +51,7 @@ const patches = [
   { file: "apply-library-wish-admin.mjs", label: "Wish Pool owner identity and moderation" },
   { file: "apply-library-traveler-identity.mjs", label: "Wish Pool traveler nickname and identity code" },
   { file: "apply-library-mobile-keeper.mjs", label: "mobile library keeper and return link" },
+  { file: "apply-library-mobile-footer.mjs", label: "library keeper footer on mobile" },
   { file: "apply-travel-rabbit-art.mjs", label: "illustrated travel rabbit avatar" },
   { file: "apply-strict-room-isolation.mjs", label: "strict room isolation" },
   { file: "apply-tavern-delete-actions.mjs", label: "separate tavern note and record deletion" },
