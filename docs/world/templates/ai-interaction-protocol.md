@@ -377,3 +377,7 @@ AI 内容：
 ```
 
 每一次互动，都是世界留下的一页。
+
+地图和侧边栏位置
+world-map-data
+room-registry
