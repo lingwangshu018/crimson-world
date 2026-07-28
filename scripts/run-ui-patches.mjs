@@ -45,6 +45,7 @@ const patches = [
   { file: "apply-cafe-restore-front.mjs", label: "restore cafe landing and workshop order" },
   { file: "apply-cafe-tavern-layout-fixes.mjs", label: "tavern-style cafe archive layout" },
   { file: "apply-library-book-reader.mjs", label: "styled Royal Library book reader" },
+  { file: "apply-library-reader-public-only.mjs", label: "public-only Royal Library reader" },
   { file: "apply-strict-room-isolation.mjs", label: "strict room isolation" },
   { file: "apply-tavern-delete-actions.mjs", label: "separate tavern note and record deletion" },
 ];
