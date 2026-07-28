@@ -20,14 +20,18 @@ import {
   POST as mcpPOST,
 } from "./app/api/mcp/route";
 import {
+  DELETE as wishesDELETE,
   GET as wishesGET,
   OPTIONS as wishesOPTIONS,
+  PATCH as wishesPATCH,
   POST as wishesPOST,
+  setWishAdminKey,
 } from "./app/api/wishes/route";
 
 type Env = {
   DB: D1Database;
   ASSETS: Fetcher;
+  WISH_ADMIN_KEY?: string;
 };
 
 function methodNotAllowed(allow: string) {
@@ -75,7 +79,7 @@ export default {
     if (url.pathname === "/api/mcp" || url.pathname === "/api/mcp/") {
       setD1(env.DB);
       switch (method) {
-        case "OPTIONS": return mcpOPTIONS(request);
+        case "OPTIONS": return mcpOPTIONS();
         case "GET": return mcpGET(request);
         case "POST": return mcpPOST(request);
         case "DELETE": return mcpDELETE(request);
@@ -85,11 +89,14 @@ export default {
 
     if (url.pathname === "/api/wishes" || url.pathname === "/api/wishes/") {
       setD1(env.DB);
+      setWishAdminKey(env.WISH_ADMIN_KEY);
       switch (method) {
         case "OPTIONS": return wishesOPTIONS();
         case "GET": return wishesGET();
         case "POST": return wishesPOST(request);
-        default: return methodNotAllowed("GET, POST, OPTIONS");
+        case "PATCH": return wishesPATCH(request);
+        case "DELETE": return wishesDELETE(request);
+        default: return methodNotAllowed("GET, POST, PATCH, DELETE, OPTIONS");
       }
     }
 
