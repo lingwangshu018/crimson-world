@@ -108,7 +108,7 @@ replace(
 
   async function deleteWish(id: string) {
     if (!window.confirm("确定要永久删除这枚愿望吗？")) return;
-    const response = await fetch(\`${OFFICIAL_WISH_API}?id=\${encodeURIComponent(id)}\`, {
+    const response = await fetch(\`\${OFFICIAL_WISH_API}?id=\${encodeURIComponent(id)}\`, {
       method: "DELETE",
       headers: { Authorization: \`Bearer \${adminKey}\` },
     });
