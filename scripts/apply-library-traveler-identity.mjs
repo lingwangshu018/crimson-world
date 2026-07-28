@@ -144,6 +144,11 @@ replaceExact(
 );
 
 replaceExact(
+`{error ? <div className="wish-state error">{error}<button onClick={load}>重新查看</button></div> : null}`,
+`{error ? <div className="wish-state error">{error}<button onClick={() => void load()}>重新查看</button></div> : null}`
+);
+
+replaceExact(
 `      headers: { "Content-Type": "application/json", "X-Visitor-Id": visitorId },
       body: JSON.stringify({ type, title, content, authorName: name || "匿名旅人" }),`,
 `      headers: { "Content-Type": "application/json", "X-Visitor-Id": visitorId, ...(travelerToken ? { "X-Traveler-Token": travelerToken } : {}) },
