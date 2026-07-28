@@ -98,6 +98,8 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
   const [record, setRecord] = useState(() => readTravelRecords()[0] ?? null);
   const [history, setHistory] = useState(() => readTravelRecords());
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [letterDrafts, setLetterDrafts] = useState<Record<string, string>>({});
   const [sending, setSending] = useState(false);
   const [receiving, setReceiving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -116,12 +118,51 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
     const result = startTravel();
     createTravelRecord(result);
     setExpandedId(result.id);
+    setEditingId(null);
     refreshHistory(result.id);
   }
 
   function openHistoryRecord(item: TravelRecord) {
     setExpandedId((current) => (current === item.id ? null : item.id));
     setRecord(item);
+  }
+
+  function startWritingLetter(item: TravelRecord) {
+    setExpandedId(item.id);
+    setRecord(item);
+    setLetterDrafts((previous) => ({
+      ...previous,
+      [item.id]: previous[item.id] ?? getTravelLetter(item),
+    }));
+    setEditingId(item.id);
+  }
+
+  function cancelWritingLetter(item: TravelRecord) {
+    setLetterDrafts((previous) => ({
+      ...previous,
+      [item.id]: getTravelLetter(item),
+    }));
+    setEditingId(null);
+  }
+
+  function saveManualLetter(item: TravelRecord) {
+    const note = String(letterDrafts[item.id] ?? "").trim();
+    if (!note) {
+      window.alert("旅行信还是空的，先写一点内容再保存吧。");
+      return;
+    }
+
+    const noteUpdatedAt = new Date().toISOString();
+    updateTravelRecord(item.id, (current) => ({
+      ...current,
+      note,
+      noteUpdatedAt,
+      vaultSyncedAt: null,
+    }));
+    setEditingId(null);
+    setExpandedId(item.id);
+    refreshHistory(item.id);
+    window.alert("✍️ 旅行信已经保存到这次旅行记录里啦。");
   }
 
   async function syncTravelRecord(current: TravelRecord) {
@@ -282,6 +323,8 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
         note: visibleCloudNote,
         noteUpdatedAt: cloudUpdatedAt,
       }));
+      setLetterDrafts((previous) => ({ ...previous, [record.id]: visibleCloudNote }));
+      setEditingId(null);
       refreshHistory(record.id);
       setExpandedId(record.id);
       window.alert("📬 新旅行信已经收取，并放回这次旅行记录里啦。");
@@ -310,6 +353,8 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
         const records = JSON.parse(String(reader.result));
         if (Array.isArray(records)) {
           importTravelRecords(records);
+          setEditingId(null);
+          setLetterDrafts({});
           refreshHistory();
         }
       } catch {
@@ -364,6 +409,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
         {history.length ? history.map((item, index) => {
           const letter = getTravelLetter(item);
           const expanded = expandedId === item.id;
+          const editing = editingId === item.id;
           return (
             <article className={`travel-history-entry ${expanded ? "is-open" : ""}`} key={item.id}>
               <button
@@ -375,7 +421,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
                 <span>
                   <small>TR-{String(index + 1).padStart(4, "0")} · {formatTravelDate(item.createdAt)}</small>
                   <strong>{item.city} · {item.location}</strong>
-                  <em>{letter ? "已收到旅行信" : "等待旅行信"}</em>
+                  <em>{letter ? "已有旅行信" : "等待旅行信"}</em>
                 </span>
                 <b aria-hidden="true">{expanded ? "−" : "＋"}</b>
               </button>
@@ -392,7 +438,35 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
                   </div>
                   <div className="travel-history-letter">
                     <h3>TRAVEL LETTER · 旅行信</h3>
-                    {letter ? <p>{letter}</p> : <p className="is-empty">这封信还在路上。</p>}
+                    {editing ? (
+                      <>
+                        <textarea
+                          value={letterDrafts[item.id] ?? letter}
+                          maxLength={20000}
+                          placeholder="把这次旅行写成一封信吧……"
+                          onChange={(event) => setLetterDrafts((previous) => ({
+                            ...previous,
+                            [item.id]: event.target.value,
+                          }))}
+                        />
+                        <small className="travel-letter-count">
+                          {(letterDrafts[item.id] ?? letter).length} / 20000
+                        </small>
+                        <div className="travel-letter-editor-actions">
+                          <button type="button" onClick={() => cancelWritingLetter(item)}>取消</button>
+                          <button type="button" onClick={() => saveManualLetter(item)}>💾 保存旅行信</button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {letter ? <p>{letter}</p> : <p className="is-empty">这封信还在路上，也可以由你亲手写下。</p>}
+                        <div className="travel-letter-editor-actions">
+                          <button type="button" onClick={() => startWritingLetter(item)}>
+                            ✍️ {letter ? "编辑旅行信" : "自己编写"}
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               ) : null}
