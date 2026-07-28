@@ -64,6 +64,20 @@ function getTravelLetter(record?: TravelRecord | null) {
   return protocolHits >= 2 ? "" : note;
 }
 
+function formatTravelDate(value: string) {
+  try {
+    return new Intl.DateTimeFormat("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(value));
+  } catch {
+    return value;
+  }
+}
+
 function recordTitle(record: TravelRecord) {
   return `${record.city} · ${record.location}`;
 }
@@ -83,20 +97,31 @@ function recordContent(record: TravelRecord) {
 export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) {
   const [record, setRecord] = useState(() => readTravelRecords()[0] ?? null);
   const [history, setHistory] = useState(() => readTravelRecords());
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [receiving, setReceiving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  function refreshHistory() {
+  function refreshHistory(preferredId?: string) {
     const records = readTravelRecords();
     setHistory(records);
-    setRecord(records[0] ?? null);
+    setRecord(
+      preferredId
+        ? records.find((item) => item.id === preferredId) ?? records[0] ?? null
+        : records[0] ?? null,
+    );
   }
 
   function beginTravel() {
     const result = startTravel();
     createTravelRecord(result);
-    refreshHistory();
+    setExpandedId(result.id);
+    refreshHistory(result.id);
+  }
+
+  function openHistoryRecord(item: TravelRecord) {
+    setExpandedId((current) => (current === item.id ? null : item.id));
+    setRecord(item);
   }
 
   async function syncTravelRecord(current: TravelRecord) {
@@ -150,7 +175,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
     }
 
     updateTravelRecord(current.id, (item) => ({ ...item, vaultSyncedAt: now }));
-    refreshHistory();
+    refreshHistory(current.id);
     return keys;
   }
 
@@ -257,7 +282,8 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
         note: visibleCloudNote,
         noteUpdatedAt: cloudUpdatedAt,
       }));
-      refreshHistory();
+      refreshHistory(record.id);
+      setExpandedId(record.id);
       window.alert("📬 新旅行信已经收取，并放回这次旅行记录里啦。");
     } catch (error) {
       const message = error instanceof Error ? error.message : "收取失败，请稍后重试。";
@@ -314,7 +340,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
             <p>🔎 发现：{record.discoveries.join("、")}</p>
             <p>🎁 带回：{record.souvenirs.join("、")}</p>
             <p>🍰 品尝：{record.food.join("、")}</p>
-            {currentLetter ? <p>✉️ 旅行信：{currentLetter}</p> : null}
+            {currentLetter ? <p className="travel-current-letter">✉️ 旅行信：{currentLetter}</p> : null}
           </div>
         ) : <p>今天还没有旅行记录。</p>}
 
@@ -333,13 +359,46 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
         <p>{record?.souvenirs.join("、") ?? "旅行收获会显示在这里。"}</p>
       </section>
 
-      <section className="travel-rabbit-card">
+      <section className="travel-rabbit-card travel-history-section">
         <h2>📖 旅行历史</h2>
-        {history.length ? history.map((item) => (
-          <p key={item.id}>
-            {item.city} · {item.location}{getTravelLetter(item) ? " · 已收到旅行信" : ""}
-          </p>
-        )) : <p>还没有历史旅行。</p>}
+        {history.length ? history.map((item, index) => {
+          const letter = getTravelLetter(item);
+          const expanded = expandedId === item.id;
+          return (
+            <article className={`travel-history-entry ${expanded ? "is-open" : ""}`} key={item.id}>
+              <button
+                type="button"
+                className="travel-history-summary"
+                onClick={() => openHistoryRecord(item)}
+                aria-expanded={expanded}
+              >
+                <span>
+                  <small>TR-{String(index + 1).padStart(4, "0")} · {formatTravelDate(item.createdAt)}</small>
+                  <strong>{item.city} · {item.location}</strong>
+                  <em>{letter ? "已收到旅行信" : "等待旅行信"}</em>
+                </span>
+                <b aria-hidden="true">{expanded ? "−" : "＋"}</b>
+              </button>
+
+              {expanded ? (
+                <div className="travel-history-detail">
+                  <div className="travel-history-facts">
+                    <p><span>目的地</span>{item.continent} · {item.city}</p>
+                    <p><span>地点</span>{item.location}</p>
+                    <p><span>遇见</span>{item.encounter.join("、")}</p>
+                    <p><span>发现</span>{item.discoveries.join("、")}</p>
+                    <p><span>带回</span>{item.souvenirs.join("、")}</p>
+                    <p><span>品尝</span>{item.food.join("、")}</p>
+                  </div>
+                  <div className="travel-history-letter">
+                    <h3>TRAVEL LETTER · 旅行信</h3>
+                    {letter ? <p>{letter}</p> : <p className="is-empty">这封信还在路上。</p>}
+                  </div>
+                </div>
+              ) : null}
+            </article>
+          );
+        }) : <p>还没有历史旅行。</p>}
       </section>
 
       <section className="travel-data-actions">
