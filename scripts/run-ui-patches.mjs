@@ -17,7 +17,6 @@ const patches = [
   { file: "apply-unified-cloud-archive.mjs", label: "unified cloud archive" },
   { file: "apply-assistive-cloud-menu.mjs", label: "cloud assistive menu" },
   { file: "apply-cloud-orb-body-portal.mjs", label: "global cloud orb portal" },
-  // This is a compatibility polish. A changed selector must not block every room build.
   { file: "apply-static-world-trigger.mjs", label: "static world trigger", optional: true },
   { file: "apply-time-wheel-ai-tools.mjs", label: "time wheel AI read reply and locate" },
   { file: "apply-time-wheel-room.mjs", label: "time wheel room" },
@@ -42,6 +41,7 @@ const patches = [
   { file: "apply-time-wheel-html-write-guard.mjs", label: "time wheel HTML reply validation" },
   { file: "apply-cafe-order-backups.mjs", label: "cafe order backups" },
   { file: "apply-cafe-room.mjs", label: "standalone Crimson Cafe room" },
+  { file: "apply-cafe-tavern-layout-fixes.mjs", label: "tavern-style cafe archive layout" },
   { file: "apply-strict-room-isolation.mjs", label: "strict room isolation" },
   { file: "apply-tavern-delete-actions.mjs", label: "separate tavern note and record deletion" },
 ];
