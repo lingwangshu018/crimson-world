@@ -75,14 +75,14 @@ const books: Book[] = [
   {
     title: "第一册生物图鉴",
     section: "creatures",
-    path: "",
+    path: "docs/world/Cities/xiting.md",
     summary: "等待编纂者记录绯界的第一种生物。",
     status: "待编纂",
   },
   {
     title: "初代编纂者档案",
     section: "characters",
-    path: "",
+    path: "docs/world/Cities/xiting.md",
     summary: "等待建立属于小宝的正式人物档案。",
     status: "待编纂",
   },
