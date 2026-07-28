@@ -3,8 +3,13 @@ import fs from "node:fs";
 const path = new URL("../app/CafeRoom.tsx", import.meta.url);
 let source = fs.readFileSync(path, "utf8");
 
-if (source.includes("CRIMSON_CAFE_ORDER_BACKUPS")) {
-  console.log("Cafe order backup tools already applied.");
+const hasIntegratedBackups =
+  source.includes("function exportRecords()") &&
+  source.includes("function importRecords(file: File)") &&
+  source.includes("const importRef = useRef<HTMLInputElement>(null)");
+
+if (source.includes("CRIMSON_CAFE_ORDER_BACKUPS") || hasIntegratedBackups) {
+  console.log("Cafe order backup tools already integrated in the current CafeRoom.");
   process.exit(0);
 }
 
