@@ -89,6 +89,12 @@ export function WorldNav() {
     setMapOpen(true);
   };
 
+  const closeActiveRoom = () => {
+    setOpen(false);
+    setPreviousActive(null);
+    setMapOpen(true);
+  };
+
   const openLibrary = () => {
     setOpen(false);
     setMapOpen(false);
@@ -122,7 +128,7 @@ export function WorldNav() {
         </nav>
       </aside>
       <WorldMap open={mapOpen} active={active} onClose={() => setMapOpen(false)} onSelect={selectSpace} onOpenCloud={() => {}} onOpenLibrary={openLibrary} />
-      <div className="world-active-room"><WorldRoomOutlet active={active} onClose={() => setPreviousActive(null)} /></div>
+      <div className="world-active-room"><WorldRoomOutlet active={active} onClose={closeActiveRoom} /></div>
     </>
   );
 }
