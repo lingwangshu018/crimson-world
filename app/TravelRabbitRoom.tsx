@@ -16,6 +16,13 @@ const OWNER_KEY = "crimson-tavern.vault-owner-key.v1";
 const READ_KEY = "crimson-tavern.vault-read-key.v1";
 const REPLY_KEY = "crimson-tavern.vault-note-key.v1";
 const RECORDS_API_URL = "https://crimson-world.lingwangshu018.workers.dev/api/records";
+const LEGACY_PROTOCOL_TOKENS = [
+  "open_door",
+  "look_around",
+  "encounter",
+  "bring_back_memory",
+  "send_postcard",
+];
 
 function createVaultKey() {
   const bytes = new Uint8Array(32);
@@ -47,6 +54,14 @@ function ensureVaultKeys() {
   }
 
   return { ownerKey, readKey, replyKey };
+}
+
+function getTravelLetter(record?: TravelRecord | null) {
+  const note = String(record?.note || "").trim();
+  if (!note) return "";
+  const normalized = note.toLowerCase();
+  const protocolHits = LEGACY_PROTOCOL_TOKENS.filter((token) => normalized.includes(token)).length;
+  return protocolHits >= 2 ? "" : note;
 }
 
 function recordTitle(record: TravelRecord) {
@@ -105,7 +120,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
             title: recordTitle(current),
             summary: current.memory.slice(0, 240),
             content: recordContent(current),
-            note: current.note || "",
+            note: getTravelLetter(current),
             createdAt: current.createdAt,
             updatedAt: current.noteUpdatedAt || current.createdAt || now,
             noteUpdatedAt: current.noteUpdatedAt || null,
@@ -221,7 +236,8 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
         (item) => item.id === record.id && (!item.module || item.module === "travel-rabbit"),
       );
       const cloudNote = String(cloudRecord?.note || "").trim();
-      if (!cloudNote) {
+      const visibleCloudNote = getTravelLetter({ ...record, note: cloudNote });
+      if (!visibleCloudNote) {
         window.alert("邮筒里暂时还没有这次旅行的新信。AI 写回后再来收取吧。");
         return;
       }
@@ -229,7 +245,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
       const cloudUpdatedAt = cloudRecord?.noteUpdatedAt || new Date().toISOString();
       const localUpdatedAt = new Date(record.noteUpdatedAt || 0).getTime();
       if (
-        cloudNote === (record.note || "").trim() &&
+        visibleCloudNote === getTravelLetter(record) &&
         new Date(cloudUpdatedAt).getTime() <= localUpdatedAt
       ) {
         window.alert("没有发现比本机更新的旅行信。");
@@ -238,7 +254,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
 
       updateTravelRecord(record.id, (item) => ({
         ...item,
-        note: cloudNote,
+        note: visibleCloudNote,
         noteUpdatedAt: cloudUpdatedAt,
       }));
       refreshHistory();
@@ -277,6 +293,8 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
     reader.readAsText(file);
   }
 
+  const currentLetter = getTravelLetter(record);
+
   return (
     <div className="travel-rabbit-room">
       <header className="travel-rabbit-hero">
@@ -296,7 +314,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
             <p>🔎 发现：{record.discoveries.join("、")}</p>
             <p>🎁 带回：{record.souvenirs.join("、")}</p>
             <p>🍰 品尝：{record.food.join("、")}</p>
-            {record.note ? <p>✉️ 旅行信：{record.note}</p> : null}
+            {currentLetter ? <p>✉️ 旅行信：{currentLetter}</p> : null}
           </div>
         ) : <p>今天还没有旅行记录。</p>}
 
@@ -319,7 +337,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
         <h2>📖 旅行历史</h2>
         {history.length ? history.map((item) => (
           <p key={item.id}>
-            {item.city} · {item.location}{item.note ? " · 已收到旅行信" : ""}
+            {item.city} · {item.location}{getTravelLetter(item) ? " · 已收到旅行信" : ""}
           </p>
         )) : <p>还没有历史旅行。</p>}
       </section>
