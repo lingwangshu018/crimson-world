@@ -6,7 +6,7 @@ let cloud = fs.readFileSync(cloudPath, "utf8");
 let css = fs.readFileSync(cssPath, "utf8");
 
 const marker = "CRIMSON_CLOUD_PROVIDER_CHOICE";
-const defaultUrl = "https://crimson-tavern.boarder-72pound.chatgpt.site/api/vault";
+const defaultUrl = "https://crimson-world.lingwangshu018.workers.dev/api/records";
 
 if (!cloud.includes(marker)) {
   const initBefore = "    setApiUrl(read(API_URL_KEY) || DEFAULT_API_URL);";
