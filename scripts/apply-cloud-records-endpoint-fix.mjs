@@ -16,14 +16,8 @@ if (!match) {
 const indent = match[1];
 const replacement = `${indent}const url = new URL(configured);
 ${indent}// CRIMSON_CLOUD_RECORDS_ENDPOINT_FIX
-${indent}// The legacy vault host has no unified records endpoint. Route only that
-${indent}// historical default to the Crimson World worker; custom providers keep
-${indent}// using their own /api/records endpoint.
-${indent}if (url.hostname === "crimson-tavern.boarder-72pound.chatgpt.site") {
-${indent}  return "https://crimson-world.lingwangshu018.workers.dev/api/records";
-${indent}}
 ${indent}if (!url.pathname.endsWith("/api/records")) {`;
 
 source = source.replace(pattern, replacement);
 fs.writeFileSync(path, source);
-console.log("Fixed legacy full-sync records endpoint routing.");
+console.log("Normalized full-sync records endpoint routing.");
