@@ -37,34 +37,34 @@ const clearNoteFunction = `
 `;
 
 if (!source.includes("function clearNote(record: TavernRecord)")) {
-  const marker = "\n  function removeRecord(record: TavernRecord) {";
-  if (!source.includes(marker)) {
+  const functionMarker = /\n\s{2}function removeRecord\(record: TavernRecord\) \{/;
+  const match = source.match(functionMarker);
+  if (!match || match.index === undefined) {
     throw new Error("Could not locate Tavern removeRecord function.");
   }
-  source = source.replace(marker, `${clearNoteFunction}${marker}`);
+  source = `${source.slice(0, match.index)}${clearNoteFunction}${source.slice(match.index)}`;
 }
 
-if (!source.includes(">\n                                  删除手记\n                                </button>")) {
-  const marker = `                                <button
-                                  className="remove-button"
-                                  type="button"
-                                  onClick={() => removeRecord(record)}
-                                >
-                                  移除酒签
-                                </button>`;
-  if (!source.includes(marker)) {
+const hasClearButton = /onClick=\{\(\) => clearNote\(record\)\}[\s\S]{0,180}?删除手记/.test(source);
+
+if (!hasClearButton) {
+  const removeButtonPattern = /([ \t]*)<button\b[\s\S]{0,260}?onClick=\{\(\) => removeRecord\(record\)\}[\s\S]{0,180}?>[\s\S]{0,100}?移除酒签[\s\S]{0,80}?<\/button>/;
+  const match = source.match(removeButtonPattern);
+  if (!match || match.index === undefined) {
     throw new Error("Could not locate Tavern remove record button.");
   }
 
-  const replacement = `                                <button
-                                  className="remove-button clear-note-button"
-                                  type="button"
-                                  onClick={() => clearNote(record)}
-                                >
-                                  删除手记
-                                </button>
-${marker}`;
-  source = source.replace(marker, replacement);
+  const indent = match[1] || "";
+  const clearButton = `${indent}<button
+${indent}  className="remove-button clear-note-button"
+${indent}  type="button"
+${indent}  onClick={() => clearNote(record)}
+${indent}>
+${indent}  删除手记
+${indent}</button>
+`;
+
+  source = `${source.slice(0, match.index)}${clearButton}${source.slice(match.index)}`;
 }
 
 fs.writeFileSync(path, source);
