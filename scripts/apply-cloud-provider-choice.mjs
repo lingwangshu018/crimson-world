@@ -10,7 +10,12 @@ const defaultUrl = "https://crimson-world.lingwangshu018.workers.dev/api/vault";
 
 if (!cloud.includes(marker)) {
   const initBefore = "    setApiUrl(read(API_URL_KEY) || DEFAULT_API_URL);";
-  const initAfter = `    setApiUrl(read(API_URL_KEY) || DEFAULT_API_URL || "${defaultUrl}");`;
+  const initAfter = `    const savedCloudUrl = read(API_URL_KEY) || DEFAULT_API_URL || "${defaultUrl}";
+    const normalizedCloudUrl = savedCloudUrl.endsWith("/api/records")
+      ? savedCloudUrl.slice(0, -"/api/records".length) + "/api/vault"
+      : savedCloudUrl;
+    if (normalizedCloudUrl !== savedCloudUrl) write(API_URL_KEY, normalizedCloudUrl);
+    setApiUrl(normalizedCloudUrl);`;
   if (!cloud.includes(initBefore)) throw new Error("Cloud provider initialization target not found");
   cloud = cloud.replace(initBefore, initAfter);
 
