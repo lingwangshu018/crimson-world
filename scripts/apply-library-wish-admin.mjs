@@ -40,14 +40,16 @@ replace(
 };
 
 // CRIMSON_LIBRARY_WISH_ADMIN
-const WISH_ADMIN_SESSION_KEY = "crimson-world.wish-admin-key.v1";`
+const WISH_ADMIN_SESSION_KEY = "crimson-world.wish-admin-session.v2";`
 );
 
 replace(
 `  const [name, setName] = useState("");`,
 `  const [name, setName] = useState("");
   const [adminOpen, setAdminOpen] = useState(false);
-  const [adminKey, setAdminKey] = useState("");
+  const [adminUser, setAdminUser] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminToken, setAdminToken] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminBusy, setAdminBusy] = useState(false);`
 );
@@ -56,38 +58,61 @@ replace(
 `  async function load() {`,
 `  useEffect(() => {
     const saved = sessionStorage.getItem(WISH_ADMIN_SESSION_KEY) || "";
-    if (saved) { setAdminKey(saved); void verifyAdmin(saved, false); }
+    if (saved) { setAdminToken(saved); void verifyAdminSession(saved); }
   }, []);
 
-  async function verifyAdmin(key = adminKey, notify = true) {
-    if (!key.trim()) return;
+  async function verifyAdminSession(token: string) {
+    try {
+      const response = await fetch(OFFICIAL_WISH_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+        body: JSON.stringify({ action: "admin-verify" }),
+      });
+      if (!response.ok) throw new Error("登录状态已失效");
+      setIsAdmin(true);
+    } catch {
+      sessionStorage.removeItem(WISH_ADMIN_SESSION_KEY);
+      setAdminToken("");
+      setIsAdmin(false);
+    }
+  }
+
+  async function loginAdmin(event: FormEvent) {
+    event.preventDefault();
     setAdminBusy(true);
     try {
       const response = await fetch(OFFICIAL_WISH_API, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: \`Bearer \${key.trim()}\` },
-        body: JSON.stringify({ action: "admin-login" }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "admin-login", username: adminUser, password: adminPassword }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "编纂者凭证不正确。");
-      sessionStorage.setItem(WISH_ADMIN_SESSION_KEY, key.trim());
-      setAdminKey(key.trim());
+      if (!response.ok || !data.token) throw new Error(data.error || "账号或密码不正确。");
+      sessionStorage.setItem(WISH_ADMIN_SESSION_KEY, data.token);
+      setAdminToken(data.token);
+      setAdminPassword("");
       setIsAdmin(true);
       setAdminOpen(false);
-      if (notify) window.alert("✦ 欢迎回来，初代编纂者。");
+      window.alert("✦ 欢迎回来，初代编纂者。");
     } catch (reason) {
-      sessionStorage.removeItem(WISH_ADMIN_SESSION_KEY);
-      setIsAdmin(false);
-      if (notify) window.alert(reason instanceof Error ? reason.message : "没有认出编纂者。");
+      window.alert(reason instanceof Error ? reason.message : "没有认出编纂者。");
     } finally {
       setAdminBusy(false);
     }
   }
 
-  function leaveAdmin() {
+  async function leaveAdmin() {
+    const token = adminToken;
     sessionStorage.removeItem(WISH_ADMIN_SESSION_KEY);
-    setAdminKey("");
+    setAdminToken("");
     setIsAdmin(false);
+    if (token) {
+      await fetch(OFFICIAL_WISH_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+        body: JSON.stringify({ action: "admin-logout" }),
+      }).catch(() => undefined);
+    }
   }
 
   async function manageWish(wish: Wish) {
@@ -98,7 +123,7 @@ replace(
     const pinned = window.confirm(wish.pinned ? "取消置顶这枚愿望吗？" : "要把这枚愿望置顶吗？");
     const response = await fetch(OFFICIAL_WISH_API, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: \`Bearer \${adminKey}\` },
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + adminToken },
       body: JSON.stringify({ id: wish.id, status, officialReply, pinned }),
     });
     const data = await response.json();
@@ -108,9 +133,9 @@ replace(
 
   async function deleteWish(id: string) {
     if (!window.confirm("确定要永久删除这枚愿望吗？")) return;
-    const response = await fetch(\`\${OFFICIAL_WISH_API}?id=\${encodeURIComponent(id)}\`, {
+    const response = await fetch(OFFICIAL_WISH_API + "?id=" + encodeURIComponent(id), {
       method: "DELETE",
-      headers: { Authorization: \`Bearer \${adminKey}\` },
+      headers: { Authorization: "Bearer " + adminToken },
     });
     const data = await response.json();
     if (!response.ok) { window.alert(data.error || "删除失败。"); return; }
@@ -124,7 +149,7 @@ replace(
 `        <button type="button" onClick={() => setOpen(true)}>＋ 投下愿望</button>`,
 `        <div className="wish-hero-actions">
           <button type="button" onClick={() => setOpen(true)}>＋ 投下愿望</button>
-          {isAdmin ? <button type="button" className="owner" onClick={leaveAdmin}>✦ 初代编纂者</button> : <button type="button" className="quiet" onClick={() => setAdminOpen(true)}>编纂者登录</button>}
+          {isAdmin ? <button type="button" className="owner" onClick={() => void leaveAdmin()}>✦ 初代编纂者</button> : <button type="button" className="quiet" onClick={() => setAdminOpen(true)}>编纂者登录</button>}
         </div>`
 );
 
@@ -146,11 +171,12 @@ replace(
 `      {open ? (`,
 `      {adminOpen ? (
         <div className="wish-compose-backdrop" onClick={() => setAdminOpen(false)}>
-          <form className="wish-compose wish-admin-login" onSubmit={(event) => { event.preventDefault(); void verifyAdmin(); }} onClick={(event) => event.stopPropagation()}>
-            <header><div><small>OWNER ACCESS</small><h3>编纂者身份</h3></div><button type="button" onClick={() => setAdminOpen(false)}>×</button></header>
-            <p>请输入保存在 Cloudflare Secret 中的最高权限凭证。</p>
-            <label>管理员密钥<input type="password" autoComplete="current-password" value={adminKey} onChange={(event) => setAdminKey(event.target.value)} placeholder="WISH_ADMIN_KEY" required /></label>
-            <button className="submit-wish" type="submit" disabled={adminBusy}>{adminBusy ? "兔兔正在确认……" : "确认编纂者身份"}</button>
+          <form className="wish-compose wish-admin-login" onSubmit={loginAdmin} onClick={(event) => event.stopPropagation()}>
+            <header><div><small>OWNER ACCESS</small><h3>编纂者登录</h3></div><button type="button" onClick={() => setAdminOpen(false)}>×</button></header>
+            <p>使用你的初代编纂者账号和密码登录。登录状态会在当前浏览器会话中保存七天以内。</p>
+            <label>账号<input autoComplete="username" value={adminUser} onChange={(event) => setAdminUser(event.target.value)} placeholder="编纂者账号" required /></label>
+            <label>密码<input type="password" autoComplete="current-password" value={adminPassword} onChange={(event) => setAdminPassword(event.target.value)} placeholder="登录密码" required /></label>
+            <button className="submit-wish" type="submit" disabled={adminBusy}>{adminBusy ? "兔兔正在确认……" : "登录编纂者身份"}</button>
           </form>
         </div>
       ) : null}
@@ -165,4 +191,4 @@ styles += `
 
 fs.writeFileSync(componentPath, source);
 fs.writeFileSync(stylePath, styles);
-console.log("Applied owner authentication and moderation controls to the standalone Wish Pool.");
+console.log("Applied account-and-password owner authentication to the standalone Wish Pool.");
