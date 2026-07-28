@@ -14,10 +14,11 @@ replace(
   'import "./library.css";\nimport "./wish-pool.css";\nimport { WishPool } from "./WishPool";\n\n// CRIMSON_LIBRARY_WISH_POOL',
 );
 
-replace(
-  '  { id: "scriptorium", name: "编纂室", en: "SCRIPTORIUM", icon: "✎", description: "只有编纂者能够进入的世界书工作区。" },',
-  '  { id: "scriptorium", name: "编纂室", en: "SCRIPTORIUM", icon: "✎", description: "只有编纂者能够进入的世界书工作区。" },\n  { id: "wishes", name: "许愿池", en: "WISHING POOL", icon: "✧", description: "把问题、愿望和世界提案投进池中，让编纂者与旅人们一起看见。" },',
-);
+const wishSection = '  { id: "wishes", name: "许愿池", en: "WISHING POOL", icon: "✧", description: "把问题、愿望和世界提案投进池中，让编纂者与旅人们一起看见。" },';
+if (!source.includes(wishSection)) {
+  const charactersSection = '  { id: "characters", name: "人物档案", en: "CHARACTERS", icon: "♙", description: "保存人物身份、经历、关系与传闻。" },';
+  replace(charactersSection, `${charactersSection}\n${wishSection}`);
+}
 
 replace(
   '          <div className="library-grid">',
