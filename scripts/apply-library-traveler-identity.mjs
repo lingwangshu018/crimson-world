@@ -10,12 +10,12 @@ if (source.includes("CRIMSON_LIBRARY_TRAVELER_IDENTITY")) {
   process.exit(0);
 }
 
-function replace(before, after) {
+function replaceExact(before, after) {
   if (!source.includes(before)) throw new Error(`Traveler identity target not found: ${before.slice(0, 140)}`);
   source = source.replace(before, after);
 }
 
-replace(
+replaceExact(
 `  pinned?: number;
 };`,
 `  pinned?: number;
@@ -27,7 +27,7 @@ const TRAVELER_TOKEN_KEY = "crimson-world.wish-traveler-token.v1";
 const TRAVELER_NAME_KEY = "crimson-world.wish-traveler-name.v1";`
 );
 
-replace(
+replaceExact(
 `  const [adminBusy, setAdminBusy] = useState(false);`,
 `  const [adminBusy, setAdminBusy] = useState(false);
   const [travelerOpen, setTravelerOpen] = useState(false);
@@ -39,7 +39,7 @@ replace(
   const [issuedCode, setIssuedCode] = useState("");`
 );
 
-replace(
+replaceExact(
 `  async function load() {`,
 `  useEffect(() => {
     const token = localStorage.getItem(TRAVELER_TOKEN_KEY) || "";
@@ -83,11 +83,8 @@ replace(
       localStorage.setItem(TRAVELER_NAME_KEY, data.traveler.nickname);
       setTravelerToken(data.token);
       setTravelerName(data.traveler.nickname);
-      if (data.identityCode) {
-        setIssuedCode(data.identityCode);
-      } else {
-        setTravelerOpen(false);
-      }
+      if (data.identityCode) setIssuedCode(data.identityCode);
+      else setTravelerOpen(false);
       setTravelerCode("");
       await load(data.token);
     } catch (reason) {
@@ -141,19 +138,19 @@ replace(
   async function load(token = travelerToken) {`
 );
 
-replace(
+replaceExact(
 `      const response = await fetch(OFFICIAL_WISH_API);`,
 `      const response = await fetch(OFFICIAL_WISH_API, { headers: token ? { "X-Traveler-Token": token } : {} });`
 );
 
-replace(
+replaceExact(
 `      headers: { "Content-Type": "application/json", "X-Visitor-Id": visitorId },
       body: JSON.stringify({ type, title, content, authorName: name || "匿名旅人" }),`,
 `      headers: { "Content-Type": "application/json", "X-Visitor-Id": visitorId, ...(travelerToken ? { "X-Traveler-Token": travelerToken } : {}) },
       body: JSON.stringify({ type, title, content, authorName: travelerToken ? travelerName : (name || "匿名旅人") }),`
 );
 
-replace(
+replaceExact(
 `        <div className="wish-hero-actions">
           <button type="button" onClick={() => setOpen(true)}>＋ 投下愿望</button>
           {isAdmin ? <button type="button" className="owner" onClick={() => void leaveAdmin()}>✦ 初代编纂者</button> : <button type="button" className="quiet" onClick={() => setAdminOpen(true)}>编纂者登录</button>}
@@ -165,22 +162,18 @@ replace(
         </div>`
 );
 
-replace(
-`          <article className={\`wish-card \${wish.pinned ? "is-pinned" : ""}\`} key={wish.id}>
-             <header><span>{types[wish.type as keyof typeof types] || types.note}{wish.pinned ? " · 置顶" : ""}</span><em>{statuses[wish.status] || wish.status}</em></header>
-             <h3>{wish.title}</h3><p>{wish.content}</p>
-             {wish.officialReply ? <aside className="wish-official-reply"><b>✦ 初代编纂者回应</b><p>{wish.officialReply}</p></aside> : null}
-             <footer><small>{wish.authorName || "匿名旅人"} · {new Date(wish.createdAt).toLocaleString("zh-CN")}</small><div><button type="button" onClick={() => light(wish.id)}>✦ 点亮 {wish.lights}</button>{isAdmin ? <><button type="button" className="manage" onClick={() => manageWish(wish)}>管理</button><button type="button" className="danger" onClick={() => deleteWish(wish.id)}>删除</button></> : null}</div></footer>
-           </article>`,
-`          <article className={\`wish-card \${wish.pinned ? "is-pinned" : ""} \${wish.mine ? "is-mine" : ""}\`} key={wish.id}>
-             <header><span>{types[wish.type as keyof typeof types] || types.note}{wish.pinned ? " · 置顶" : ""}{wish.mine ? " · 我的愿望" : ""}</span><em>{statuses[wish.status] || wish.status}</em></header>
-             <h3>{wish.title}</h3><p>{wish.content}</p>
-             {wish.officialReply ? <aside className="wish-official-reply"><b>✦ 初代编纂者回应</b><p>{wish.officialReply}</p></aside> : null}
-             <footer><small>{wish.authorName || "匿名旅人"} · {new Date(wish.createdAt).toLocaleString("zh-CN")}</small><div><button type="button" onClick={() => light(wish.id)}>✦ 点亮 {wish.lights}</button>{wish.mine && !isAdmin ? <><button type="button" className="manage" onClick={() => editOwnWish(wish)}>修改</button><button type="button" className="danger" onClick={() => deleteOwnWish(wish.id)}>收回</button></> : null}{isAdmin ? <><button type="button" className="manage" onClick={() => manageWish(wish)}>管理</button><button type="button" className="danger" onClick={() => deleteWish(wish.id)}>删除</button></> : null}</div></footer>
-           </article>`
+const cardPattern = /<article className=\{`wish-card \$\{wish\.pinned \? "is-pinned" : ""\}`\} key=\{wish\.id\}>[\s\S]*?<\/article>/;
+if (!cardPattern.test(source)) throw new Error("Traveler identity wish-card target not found.");
+source = source.replace(cardPattern,
+`<article className={\`wish-card \${wish.pinned ? "is-pinned" : ""} \${wish.mine ? "is-mine" : ""}\`} key={wish.id}>
+            <header><span>{types[wish.type as keyof typeof types] || types.note}{wish.pinned ? " · 置顶" : ""}{wish.mine ? " · 我的愿望" : ""}</span><em>{statuses[wish.status] || wish.status}</em></header>
+            <h3>{wish.title}</h3><p>{wish.content}</p>
+            {wish.officialReply ? <aside className="wish-official-reply"><b>✦ 初代编纂者回应</b><p>{wish.officialReply}</p></aside> : null}
+            <footer><small>{wish.authorName || "匿名旅人"} · {new Date(wish.createdAt).toLocaleString("zh-CN")}</small><div><button type="button" onClick={() => light(wish.id)}>✦ 点亮 {wish.lights}</button>{wish.mine && !isAdmin ? <><button type="button" className="manage" onClick={() => editOwnWish(wish)}>修改</button><button type="button" className="danger" onClick={() => deleteOwnWish(wish.id)}>收回</button></> : null}{isAdmin ? <><button type="button" className="manage" onClick={() => manageWish(wish)}>管理</button><button type="button" className="danger" onClick={() => deleteWish(wish.id)}>删除</button></> : null}</div></footer>
+          </article>`
 );
 
-replace(
+replaceExact(
 `      {adminOpen ? (`,
 `      {travelerOpen ? (
         <div className="wish-compose-backdrop" onClick={() => setTravelerOpen(false)}>
