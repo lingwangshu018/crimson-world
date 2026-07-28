@@ -40,6 +40,7 @@ const patches = [
   { file: "apply-direct-reply-collection.mjs", label: "direct tavern and time wheel reply collection" },
   { file: "apply-time-wheel-html-ai-workflow.mjs", label: "time wheel HTML template AI workflow" },
   { file: "apply-time-wheel-html-write-guard.mjs", label: "time wheel HTML reply validation" },
+  { file: "apply-time-wheel-unified-mcp.mjs", label: "unified time wheel MCP records" },
   { file: "apply-cafe-order-backups.mjs", label: "cafe order backups" },
   { file: "apply-cafe-room.mjs", label: "standalone Crimson Cafe room" },
   { file: "apply-cafe-restore-front.mjs", label: "restore cafe landing and workshop order" },
