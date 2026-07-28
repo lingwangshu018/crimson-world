@@ -95,7 +95,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
 }
 
 .travel-ai-panel-head span {
@@ -114,14 +114,15 @@
 }
 
 .travel-ai-panel > h2 {
-  margin: 0 0 10px;
+  margin: 0 0 20px;
   font-size: 23px;
 }
 
-.travel-ai-panel > p {
-  margin: 0 0 22px;
-  color: rgba(234, 216, 178, .62);
-  line-height: 1.75;
+/* AI 面板只保留标题、编码输入与两个动作，不展示说明性文案。 */
+.travel-ai-panel > p,
+.travel-code-help,
+.travel-ai-actions button > small {
+  display: none;
 }
 
 .travel-code-field {
@@ -156,26 +157,22 @@
   color: rgba(234, 216, 178, .36);
 }
 
-.travel-code-help {
-  display: block;
-  margin-top: 10px;
-  color: rgba(234, 216, 178, .52);
-  line-height: 1.6;
-}
-
 .travel-ai-actions {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   margin-top: 22px;
 }
 
 .travel-ai-actions button {
-  display: grid;
-  gap: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  padding: 16px 20px;
-  border-radius: 15px;
-  text-align: left;
+  min-height: 54px;
+  padding: 14px 18px;
+  border-radius: 999px;
+  text-align: center;
   background: linear-gradient(135deg, rgba(104, 25, 41, .7), rgba(50, 16, 24, .82));
 }
 
@@ -186,11 +183,6 @@
 .travel-ai-actions strong {
   color: #f1d9ac;
   font-size: 16px;
-}
-
-.travel-ai-actions small {
-  color: rgba(234, 216, 178, .58);
-  font-size: 12px;
 }
 
 .travel-record-code {
@@ -398,6 +390,10 @@
 
   .travel-code-field input {
     font-size: 18px;
+  }
+
+  .travel-ai-actions {
+    grid-template-columns: 1fr;
   }
 
   .travel-history-summary {
