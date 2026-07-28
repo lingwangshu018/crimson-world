@@ -43,6 +43,7 @@ const patches = [
   { file: "apply-cafe-order-backups.mjs", label: "cafe order backups" },
   { file: "apply-cafe-room.mjs", label: "standalone Crimson Cafe room" },
   { file: "apply-strict-room-isolation.mjs", label: "strict room isolation" },
+  { file: "apply-tavern-delete-actions.mjs", label: "separate tavern note and record deletion" },
 ];
 
 console.log("\nCrimson World UI patch pipeline\n");
