@@ -57,6 +57,7 @@ const patches = [
   { file: "apply-travel-rabbit-art.mjs", label: "illustrated travel rabbit avatar" },
   { file: "apply-strict-room-isolation.mjs", label: "strict room isolation" },
   { file: "apply-tavern-delete-actions.mjs", label: "separate tavern note and record deletion" },
+  { file: "apply-mcp-direct-records-call.mjs", label: "direct MCP records routing" },
 ];
 
 console.log("\nCrimson World UI patch pipeline\n");
