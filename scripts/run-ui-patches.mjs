@@ -46,6 +46,7 @@ const patches = [
   { file: "apply-cafe-tavern-layout-fixes.mjs", label: "tavern-style cafe archive layout" },
   { file: "apply-library-book-reader.mjs", label: "styled Royal Library book reader" },
   { file: "apply-library-reader-public-only.mjs", label: "public-only Royal Library reader" },
+  { file: "apply-library-traveler-public.mjs", label: "traveler-facing Royal Library" },
   { file: "apply-library-wish-pool.mjs", label: "official Royal Library wish pool" },
   { file: "apply-library-wish-admin.mjs", label: "Wish Pool owner identity and moderation" },
   { file: "apply-library-traveler-identity.mjs", label: "Wish Pool traveler nickname and identity code" },
