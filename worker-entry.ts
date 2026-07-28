@@ -25,13 +25,14 @@ import {
   OPTIONS as wishesOPTIONS,
   PATCH as wishesPATCH,
   POST as wishesPOST,
-  setWishAdminKey,
+  setWishAdminCredentials,
 } from "./app/api/wishes/route";
 
 type Env = {
   DB: D1Database;
   ASSETS: Fetcher;
-  WISH_ADMIN_KEY?: string;
+  WISH_ADMIN_USER?: string;
+  WISH_ADMIN_PASSWORD?: string;
 };
 
 function methodNotAllowed(allow: string) {
@@ -89,7 +90,7 @@ export default {
 
     if (url.pathname === "/api/wishes" || url.pathname === "/api/wishes/") {
       setD1(env.DB);
-      setWishAdminKey(env.WISH_ADMIN_KEY);
+      setWishAdminCredentials(env.WISH_ADMIN_USER, env.WISH_ADMIN_PASSWORD);
       switch (method) {
         case "OPTIONS": return wishesOPTIONS();
         case "GET": return wishesGET();
