@@ -12,6 +12,7 @@ const patches = [
   { file: "apply-journal-paper-polish.mjs", label: "journal paper theme" },
   { file: "apply-journal-line-alignment.mjs", label: "journal ruled-line alignment" },
   { file: "apply-journal-pin-favorite.mjs", label: "journal pin and favorite" },
+  { file: "apply-journal-reader-toolbar.mjs", label: "compact journal reader toolbar" },
   { file: "apply-cloud-orb-top-layer.mjs", label: "cloud orb layer" },
   { file: "apply-cloud-journal-archive.mjs", label: "cloud journal archive" },
   { file: "apply-unified-cloud-archive.mjs", label: "unified cloud archive" },
