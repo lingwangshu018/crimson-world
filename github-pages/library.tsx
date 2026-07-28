@@ -75,7 +75,7 @@ const books: Book[] = [
   {
     title: "第一册生物图鉴",
     section: "creatures",
-    path: "docs/world/Cities/xiting.md",
+    path: "docs/world/Cities/README.md",
     summary: "等待编纂者记录绯界的第一种生物。",
     status: "待编纂",
   },
