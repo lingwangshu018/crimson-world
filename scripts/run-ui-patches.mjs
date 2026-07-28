@@ -48,6 +48,7 @@ const patches = [
   { file: "apply-library-reader-public-only.mjs", label: "public-only Royal Library reader" },
   { file: "apply-library-wish-pool.mjs", label: "official Royal Library wish pool" },
   { file: "apply-library-wish-admin.mjs", label: "Wish Pool owner identity and moderation" },
+  { file: "apply-library-traveler-identity.mjs", label: "Wish Pool traveler nickname and identity code" },
   { file: "apply-strict-room-isolation.mjs", label: "strict room isolation" },
   { file: "apply-tavern-delete-actions.mjs", label: "separate tavern note and record deletion" },
 ];
