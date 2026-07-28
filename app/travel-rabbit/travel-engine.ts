@@ -43,7 +43,7 @@ export function startTravel(): TravelRecord {
     food: place.food,
     souvenirs: place.souvenirs,
     memory: "小兔推开旅行之门，观察远方的风景，并把新的记忆带回绯界。",
-    note: "open_door → look_around → encounter → bring_back_memory",
+    note: "",
   };
 }
 
