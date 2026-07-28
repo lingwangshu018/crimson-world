@@ -19,6 +19,11 @@ import {
   OPTIONS as mcpOPTIONS,
   POST as mcpPOST,
 } from "./app/api/mcp/route";
+import {
+  GET as wishesGET,
+  OPTIONS as wishesOPTIONS,
+  POST as wishesPOST,
+} from "./app/api/wishes/route";
 
 type Env = {
   DB: D1Database;
@@ -46,52 +51,45 @@ export default {
     if (url.pathname === "/api/vault" || url.pathname === "/api/vault/") {
       setD1(env.DB);
       switch (method) {
-        case "OPTIONS":
-          return vaultOPTIONS();
-        case "GET":
-          return vaultGET(request);
-        case "PUT":
-          return vaultPUT(request);
-        case "POST":
-          return vaultPOST(request);
-        case "PATCH":
-          return vaultPATCH(request);
-        default:
-          return methodNotAllowed("GET, POST, PUT, PATCH, OPTIONS");
+        case "OPTIONS": return vaultOPTIONS();
+        case "GET": return vaultGET(request);
+        case "PUT": return vaultPUT(request);
+        case "POST": return vaultPOST(request);
+        case "PATCH": return vaultPATCH(request);
+        default: return methodNotAllowed("GET, POST, PUT, PATCH, OPTIONS");
       }
     }
 
     if (url.pathname === "/api/records" || url.pathname === "/api/records/") {
       setD1(env.DB);
       switch (method) {
-        case "OPTIONS":
-          return recordsOPTIONS();
-        case "GET":
-          return recordsGET(request);
-        case "PUT":
-          return recordsPUT(request);
-        case "POST":
-          return recordsPOST(request);
-        case "PATCH":
-          return recordsPATCH(request);
-        default:
-          return methodNotAllowed("GET, POST, PUT, PATCH, OPTIONS");
+        case "OPTIONS": return recordsOPTIONS();
+        case "GET": return recordsGET(request);
+        case "PUT": return recordsPUT(request);
+        case "POST": return recordsPOST(request);
+        case "PATCH": return recordsPATCH(request);
+        default: return methodNotAllowed("GET, POST, PUT, PATCH, OPTIONS");
       }
     }
 
     if (url.pathname === "/api/mcp" || url.pathname === "/api/mcp/") {
       setD1(env.DB);
       switch (method) {
-        case "OPTIONS":
-          return mcpOPTIONS(request);
-        case "GET":
-          return mcpGET(request);
-        case "POST":
-          return mcpPOST(request);
-        case "DELETE":
-          return mcpDELETE(request);
-        default:
-          return methodNotAllowed("GET, POST, DELETE, OPTIONS");
+        case "OPTIONS": return mcpOPTIONS(request);
+        case "GET": return mcpGET(request);
+        case "POST": return mcpPOST(request);
+        case "DELETE": return mcpDELETE(request);
+        default: return methodNotAllowed("GET, POST, DELETE, OPTIONS");
+      }
+    }
+
+    if (url.pathname === "/api/wishes" || url.pathname === "/api/wishes/") {
+      setD1(env.DB);
+      switch (method) {
+        case "OPTIONS": return wishesOPTIONS();
+        case "GET": return wishesGET();
+        case "POST": return wishesPOST(request);
+        default: return methodNotAllowed("GET, POST, OPTIONS");
       }
     }
 
