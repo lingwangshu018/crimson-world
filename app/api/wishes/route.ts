@@ -1,9 +1,11 @@
 import { getD1 } from "../../../db";
 
-let wishAdminKey = "";
+let wishAdminUser = "";
+let wishAdminPassword = "";
 
-export function setWishAdminKey(value?: string) {
-  wishAdminKey = String(value || "");
+export function setWishAdminCredentials(user?: string, password?: string) {
+  wishAdminUser = String(user || "").trim();
+  wishAdminPassword = String(password || "");
 }
 
 const cors = {
@@ -34,8 +36,15 @@ async function ensureTables() {
     created_at TEXT NOT NULL,
     PRIMARY KEY (wish_id, visitor_id)
   )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS wish_admin_sessions (
+    token_hash TEXT PRIMARY KEY,
+    username TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+  )`).run();
   await db.prepare("ALTER TABLE wishes ADD COLUMN official_reply TEXT NOT NULL DEFAULT ''").run().catch(() => undefined);
   await db.prepare("ALTER TABLE wishes ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0").run().catch(() => undefined);
+  await db.prepare("DELETE FROM wish_admin_sessions WHERE expires_at <= ?").bind(new Date().toISOString()).run();
 }
 
 function getBearer(request: Request) {
@@ -43,15 +52,18 @@ function getBearer(request: Request) {
   return header.startsWith("Bearer ") ? header.slice(7).trim() : "";
 }
 
+async function digestBytes(value: string) {
+  return new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
+}
+
+async function hashText(value: string) {
+  const bytes = await digestBytes(value);
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 async function sameSecret(left: string, right: string) {
   if (!left || !right) return false;
-  const encoder = new TextEncoder();
-  const [a, b] = await Promise.all([
-    crypto.subtle.digest("SHA-256", encoder.encode(left)),
-    crypto.subtle.digest("SHA-256", encoder.encode(right)),
-  ]);
-  const aa = new Uint8Array(a);
-  const bb = new Uint8Array(b);
+  const [aa, bb] = await Promise.all([digestBytes(left), digestBytes(right)]);
   if (aa.length !== bb.length) return false;
   let mismatch = 0;
   for (let index = 0; index < aa.length; index += 1) mismatch |= aa[index] ^ bb[index];
@@ -59,8 +71,11 @@ async function sameSecret(left: string, right: string) {
 }
 
 async function requireAdmin(request: Request) {
-  if (!wishAdminKey) return false;
-  return sameSecret(getBearer(request), wishAdminKey);
+  const token = getBearer(request);
+  if (!token) return false;
+  const tokenHash = await hashText(token);
+  const row = await getD1().prepare("SELECT username FROM wish_admin_sessions WHERE token_hash = ? AND expires_at > ?").bind(tokenHash, new Date().toISOString()).first();
+  return Boolean(row?.username);
 }
 
 export function OPTIONS() {
@@ -77,15 +92,42 @@ export async function POST(request: Request) {
   await ensureTables();
   const body = await request.json().catch(() => ({})) as Record<string, unknown>;
   const action = String(body.action || "create");
+  const db = getD1();
 
   if (action === "admin-login") {
+    if (!wishAdminUser || !wishAdminPassword) {
+      return Response.json({ error: "编纂者账号还没有在官方云端完成配置。" }, { status: 503, headers: cors });
+    }
+    const username = String(body.username || "").trim();
+    const password = String(body.password || "");
+    const [userOk, passwordOk] = await Promise.all([
+      sameSecret(username, wishAdminUser),
+      sameSecret(password, wishAdminPassword),
+    ]);
+    if (!userOk || !passwordOk) {
+      return Response.json({ error: "账号或密码不正确。" }, { status: 401, headers: cors });
+    }
+    const token = `${crypto.randomUUID()}${crypto.randomUUID()}`.replaceAll("-", "");
+    const tokenHash = await hashText(token);
+    const createdAt = new Date();
+    const expiresAt = new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000);
+    await db.prepare("INSERT INTO wish_admin_sessions (token_hash,username,created_at,expires_at) VALUES (?,?,?,?)").bind(tokenHash, username, createdAt.toISOString(), expiresAt.toISOString()).run();
+    return Response.json({ ok: true, token, expiresAt: expiresAt.toISOString(), role: "owner", displayName: "初代编纂者" }, { headers: cors });
+  }
+
+  if (action === "admin-verify") {
     const ok = await requireAdmin(request);
-    return Response.json(ok ? { ok: true, role: "owner", displayName: "初代编纂者" } : { error: "编纂者凭证不正确。" }, { status: ok ? 200 : 401, headers: cors });
+    return Response.json(ok ? { ok: true, role: "owner", displayName: "初代编纂者" } : { error: "登录状态已经失效，请重新登录。" }, { status: ok ? 200 : 401, headers: cors });
+  }
+
+  if (action === "admin-logout") {
+    const token = getBearer(request);
+    if (token) await db.prepare("DELETE FROM wish_admin_sessions WHERE token_hash = ?").bind(await hashText(token)).run();
+    return Response.json({ ok: true }, { headers: cors });
   }
 
   const visitorId = (request.headers.get("X-Visitor-Id") || "").slice(0, 80);
   if (!visitorId) return Response.json({ error: "缺少访客标识。" }, { status: 400, headers: cors });
-  const db = getD1();
 
   if (action === "light") {
     const wishId = String(body.wishId || "");
