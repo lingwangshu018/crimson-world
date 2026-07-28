@@ -43,6 +43,11 @@
   cursor: pointer;
 }
 
+.travel-rabbit-room button:disabled {
+  cursor: wait;
+  opacity: .58;
+}
+
 .travel-rabbit-hero button,
 .travel-letter-actions {
   display: flex;
@@ -68,13 +73,161 @@
   color: #d7b46a;
 }
 
-.travel-detail-list p,
-.travel-history-card p {
+.travel-detail-list p {
   border-bottom: 1px dashed rgba(196,154,85,.25);
   padding: 8px 0;
+}
+
+.travel-current-letter {
+  white-space: pre-wrap;
+  line-height: 1.9;
+}
+
+.travel-history-section {
+  overflow: hidden;
+}
+
+.travel-history-entry {
+  margin-top: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(196, 154, 85, .32);
+  border-radius: 18px;
+  background: rgba(18, 10, 8, .58);
+}
+
+.travel-history-entry.is-open {
+  border-color: rgba(215, 180, 106, .72);
+  box-shadow: inset 0 1px 0 rgba(255, 229, 178, .06);
+}
+
+.travel-history-summary {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  text-align: left;
+  background: transparent !important;
+}
+
+.travel-history-summary > span {
+  display: grid;
+  gap: 5px;
+}
+
+.travel-history-summary small {
+  color: rgba(234, 216, 178, .58);
+  letter-spacing: .06em;
+}
+
+.travel-history-summary strong {
+  color: #f0d6a0;
+  font-size: 18px;
+}
+
+.travel-history-summary em {
+  color: #c68d79;
+  font-size: 13px;
+  font-style: normal;
+}
+
+.travel-history-summary > b {
+  display: grid;
+  flex: 0 0 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(196, 154, 85, .4);
+  border-radius: 50%;
+  color: #d7b46a;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.travel-history-detail {
+  padding: 0 20px 22px;
+  border-top: 1px solid rgba(196, 154, 85, .22);
+}
+
+.travel-history-facts {
+  padding-top: 10px;
+}
+
+.travel-history-facts p {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 11px 0;
+  border-bottom: 1px dashed rgba(196, 154, 85, .2);
+  line-height: 1.65;
+}
+
+.travel-history-facts span {
+  color: #c77b79;
+}
+
+.travel-history-letter {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid rgba(196, 154, 85, .28);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(78, 39, 29, .22), rgba(23, 12, 10, .42));
+}
+
+.travel-history-letter h3 {
+  margin: 0 0 14px;
+  color: #d48b87;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .16em;
+}
+
+.travel-history-letter p {
+  margin: 0;
+  white-space: pre-wrap;
+  color: #ead8b2;
+  line-height: 1.9;
+}
+
+.travel-history-letter .is-empty {
+  color: rgba(234, 216, 178, .55);
+  font-style: italic;
 }
 
 .travel-back {
   display: block;
   margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+  .travel-rabbit-room {
+    padding: 18px 12px 28px;
+  }
+
+  .travel-rabbit-hero,
+  .travel-rabbit-card {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+
+  .travel-letter-actions {
+    align-items: stretch;
+  }
+
+  .travel-letter-actions button {
+    min-width: 0;
+    flex: 1;
+    padding-inline: 12px;
+  }
+
+  .travel-history-summary {
+    padding: 16px !important;
+  }
+
+  .travel-history-detail {
+    padding: 0 16px 18px;
+  }
 }
