@@ -100,9 +100,11 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [letterDrafts, setLetterDrafts] = useState<Record<string, string>>({});
+  const [recordCode, setRecordCode] = useState("");
   const [sending, setSending] = useState(false);
   const [receiving, setReceiving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const longPressTimer = useRef<number | null>(null);
 
   function refreshHistory(preferredId?: string) {
     const records = readTravelRecords();
@@ -112,6 +114,53 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
         ? records.find((item) => item.id === preferredId) ?? records[0] ?? null
         : records[0] ?? null,
     );
+  }
+
+  function displayCode(index: number) {
+    return `TR-${String(history.length - index).padStart(4, "0")}`;
+  }
+
+  function codeForRecord(item: TravelRecord) {
+    const index = history.findIndex((entry) => entry.id === item.id);
+    return index >= 0 ? displayCode(index) : "";
+  }
+
+  function findRecordByCode(value = recordCode) {
+    const normalized = value.trim().toUpperCase();
+    const match = /^TR-(\d{1,4})$/.exec(normalized);
+    if (!match) return null;
+    const number = Number(match[1]);
+    if (!Number.isInteger(number) || number < 1 || number > history.length) return null;
+    return history[history.length - number] ?? null;
+  }
+
+  async function fillRecordCode(item: TravelRecord) {
+    const code = codeForRecord(item);
+    if (!code) return;
+    setRecordCode(code);
+    setRecord(item);
+    setExpandedId(item.id);
+    try {
+      await navigator.clipboard.writeText(code);
+      window.alert(`${code} 已填入并复制。`);
+    } catch {
+      window.alert(`${code} 已填入。`);
+    }
+  }
+
+  function startCodeLongPress(item: TravelRecord) {
+    cancelCodeLongPress();
+    longPressTimer.current = window.setTimeout(() => {
+      void fillRecordCode(item);
+      longPressTimer.current = null;
+    }, 520);
+  }
+
+  function cancelCodeLongPress() {
+    if (longPressTimer.current !== null) {
+      window.clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
   }
 
   function beginTravel() {
@@ -220,18 +269,19 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
     return keys;
   }
 
-  async function sendToAI() {
-    if (!record || sending) {
-      if (!record) window.alert("请先让旅行小兔完成一次旅行。");
+  async function sendToAI(target?: TravelRecord | null) {
+    const current = target ?? record;
+    if (!current || sending) {
+      if (!current) window.alert("请先输入或长按选择一条旅行编号。");
       return;
     }
 
     setSending(true);
     try {
-      const { readKey, replyKey } = await syncTravelRecord(record);
-      const displayNumber = `TR-${String(
-        Math.max(1, history.findIndex((item) => item.id === record.id) + 1),
-      ).padStart(4, "0")}`;
+      setRecord(current);
+      setExpandedId(current.id);
+      const { readKey, replyKey } = await syncTravelRecord(current);
+      const displayNumber = codeForRecord(current);
       const text = [
         "请读取我的绯界记录，并继续完成这一事件。",
         "",
@@ -242,7 +292,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
         displayNumber,
         "",
         "【记录ID】",
-        record.id,
+        current.id,
         "",
         "【读取钥匙】",
         readKey,
@@ -270,14 +320,17 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
     }
   }
 
-  async function receiveNewNote() {
-    if (!record || receiving) {
-      if (!record) window.alert("还没有可以收取回信的旅行记录。");
+  async function receiveNewNote(target?: TravelRecord | null) {
+    const current = target ?? record;
+    if (!current || receiving) {
+      if (!current) window.alert("请先输入或长按选择一条旅行编号。");
       return;
     }
 
     setReceiving(true);
     try {
+      setRecord(current);
+      setExpandedId(current.id);
       const { ownerKey } = ensureVaultKeys();
       const response = await fetch(`${RECORDS_API_URL}?limit=250`, {
         method: "GET",
@@ -299,34 +352,34 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
       if (!response.ok) throw new Error(data.error || `收取失败（HTTP ${response.status}）`);
 
       const cloudRecord = (data.records || []).find(
-        (item) => item.id === record.id && (!item.module || item.module === "travel-rabbit"),
+        (item) => item.id === current.id && (!item.module || item.module === "travel-rabbit"),
       );
       const cloudNote = String(cloudRecord?.note || "").trim();
-      const visibleCloudNote = getTravelLetter({ ...record, note: cloudNote });
+      const visibleCloudNote = getTravelLetter({ ...current, note: cloudNote });
       if (!visibleCloudNote) {
         window.alert("邮筒里暂时还没有这次旅行的新信。AI 写回后再来收取吧。");
         return;
       }
 
       const cloudUpdatedAt = cloudRecord?.noteUpdatedAt || new Date().toISOString();
-      const localUpdatedAt = new Date(record.noteUpdatedAt || 0).getTime();
+      const localUpdatedAt = new Date(current.noteUpdatedAt || 0).getTime();
       if (
-        visibleCloudNote === getTravelLetter(record) &&
+        visibleCloudNote === getTravelLetter(current) &&
         new Date(cloudUpdatedAt).getTime() <= localUpdatedAt
       ) {
         window.alert("没有发现比本机更新的旅行信。");
         return;
       }
 
-      updateTravelRecord(record.id, (item) => ({
+      updateTravelRecord(current.id, (item) => ({
         ...item,
         note: visibleCloudNote,
         noteUpdatedAt: cloudUpdatedAt,
       }));
-      setLetterDrafts((previous) => ({ ...previous, [record.id]: visibleCloudNote }));
+      setLetterDrafts((previous) => ({ ...previous, [current.id]: visibleCloudNote }));
       setEditingId(null);
-      refreshHistory(record.id);
-      setExpandedId(record.id);
+      refreshHistory(current.id);
+      setExpandedId(current.id);
       window.alert("📬 新旅行信已经收取，并放回这次旅行记录里啦。");
     } catch (error) {
       const message = error instanceof Error ? error.message : "收取失败，请稍后重试。";
@@ -334,6 +387,24 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
     } finally {
       setReceiving(false);
     }
+  }
+
+  function sendSelectedCode() {
+    const selected = findRecordByCode();
+    if (!selected) {
+      window.alert("没有找到这个旅行编号。请输入例如 TR-0001，或长按历史记录中的编号自动填入。");
+      return;
+    }
+    void sendToAI(selected);
+  }
+
+  function receiveSelectedCode() {
+    const selected = findRecordByCode();
+    if (!selected) {
+      window.alert("没有找到这个旅行编号。请输入例如 TR-0001，或长按历史记录中的编号自动填入。");
+      return;
+    }
+    void receiveNewNote(selected);
   }
 
   function handleExport() {
@@ -355,6 +426,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
           importTravelRecords(records);
           setEditingId(null);
           setLetterDrafts({});
+          setRecordCode("");
           refreshHistory();
         }
       } catch {
@@ -388,20 +460,40 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
             {currentLetter ? <p className="travel-current-letter">✉️ 旅行信：{currentLetter}</p> : null}
           </div>
         ) : <p>今天还没有旅行记录。</p>}
-
-        <div className="travel-letter-actions">
-          <button type="button" disabled={!record || sending} onClick={sendToAI}>
-            {sending ? "正在同步……" : "📨 发送给 AI"}
-          </button>
-          <button type="button" disabled={!record || receiving} onClick={receiveNewNote}>
-            {receiving ? "正在收取……" : "📬 收取新手记"}
-          </button>
-        </div>
       </section>
 
       <section className="travel-rabbit-card">
         <h2>🎒 小兔带回来的东西</h2>
         <p>{record?.souvenirs.join("、") ?? "旅行收获会显示在这里。"}</p>
+      </section>
+
+      <section className="travel-rabbit-card travel-ai-panel">
+        <div className="travel-ai-panel-head">
+          <span>AI TRAVEL LETTER</span>
+          <em>静候回信</em>
+        </div>
+        <h2>把这次旅行交给 AI 继续书写</h2>
+        <p>输入旅行编号后直接定位这一程；历史记录里的编号可以长按自动填入并复制。</p>
+        <label className="travel-code-field">
+          <span>旅行编号</span>
+          <input
+            value={recordCode}
+            onChange={(event) => setRecordCode(event.target.value.toUpperCase())}
+            placeholder="例如 TR-0001"
+            inputMode="text"
+          />
+        </label>
+        <small className="travel-code-help">编号从最下面的第一程开始：最旧记录为 TR-0001，新记录依次向上递增。</small>
+        <div className="travel-ai-actions">
+          <button type="button" disabled={sending} onClick={sendSelectedCode}>
+            <strong>📨 发送给 AI</strong>
+            <small>{sending ? "正在准备旅行档案……" : "自动准备档案并复制发送指令"}</small>
+          </button>
+          <button type="button" disabled={receiving} onClick={receiveSelectedCode}>
+            <strong>📬 收取新手记</strong>
+            <small>{receiving ? "正在检查邮筒……" : "检查并填回对应旅行信"}</small>
+          </button>
+        </div>
       </section>
 
       <section className="travel-rabbit-card travel-history-section">
@@ -410,6 +502,7 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
           const letter = getTravelLetter(item);
           const expanded = expandedId === item.id;
           const editing = editingId === item.id;
+          const code = displayCode(index);
           return (
             <article className={`travel-history-entry ${expanded ? "is-open" : ""}`} key={item.id}>
               <button
@@ -419,7 +512,20 @@ export default function TravelRabbitRoom({ onClose }: { onClose?: () => void }) 
                 aria-expanded={expanded}
               >
                 <span>
-                  <small>TR-{String(index + 1).padStart(4, "0")} · {formatTravelDate(item.createdAt)}</small>
+                  <small
+                    className="travel-record-code"
+                    onPointerDown={(event) => {
+                      event.stopPropagation();
+                      startCodeLongPress(item);
+                    }}
+                    onPointerUp={cancelCodeLongPress}
+                    onPointerCancel={cancelCodeLongPress}
+                    onPointerLeave={cancelCodeLongPress}
+                    onContextMenu={(event) => event.preventDefault()}
+                    title="长按填入并复制编号"
+                  >
+                    {code} · {formatTravelDate(item.createdAt)}
+                  </small>
                   <strong>{item.city} · {item.location}</strong>
                   <em>{letter ? "已有旅行信" : "等待旅行信"}</em>
                 </span>
