@@ -31,6 +31,7 @@ const patches = [
   { file: "apply-cloud-provider-choice.mjs", label: "default and custom cloud provider choice" },
   { file: "apply-time-wheel-history-layout-fix.mjs", label: "time wheel mobile history layout" },
   { file: "apply-time-wheel-confirm-only.mjs", label: "time wheel simple confirmation" },
+  { file: "apply-time-wheel-copy-cleanup.mjs", label: "time wheel simplified copy and actions" },
   { file: "apply-unified-ai-task-instructions.mjs", label: "unified AI task instructions" },
   { file: "apply-time-wheel-local-ai-send.mjs", label: "time wheel local AI sending" },
   { file: "apply-journal-local-ai-send.mjs", label: "journal local AI sending" },
