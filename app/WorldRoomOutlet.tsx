@@ -1,8 +1,9 @@
 "use client";
 
-import type { ComponentType } from "react";
+import { useEffect, type ComponentType } from "react";
 import CafeRoom from "./CafeRoom";
 import { JournalRoom } from "./JournalRoom";
+import { installRoyalLibraryClipboardBridge } from "./royal-library-context";
 import { StudyRoom } from "./StudyRoom";
 import { TimeWheelRoom } from "./TimeWheelRoom";
 import TravelRabbitRoom from "./TravelRabbitRoom";
@@ -26,6 +27,10 @@ type WorldRoomOutletProps = {
 };
 
 export function WorldRoomOutlet({ active, onClose }: WorldRoomOutletProps) {
+  useEffect(() => {
+    installRoyalLibraryClipboardBridge();
+  }, []);
+
   const room = getRoom(active);
 
   if (room.renderer === "native") return null;
