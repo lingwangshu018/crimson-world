@@ -30,6 +30,7 @@ const patches = [
   { file: "apply-cloud-records-endpoint-fix.mjs", label: "full sync records endpoint" },
   { file: "apply-cloud-provider-choice.mjs", label: "default and custom cloud provider choice" },
   { file: "apply-time-wheel-history-layout-fix.mjs", label: "time wheel mobile history layout" },
+  { file: "apply-time-wheel-history-final-layout.mjs", label: "final time wheel history card layout" },
   { file: "apply-time-wheel-confirm-only.mjs", label: "time wheel simple confirmation" },
   { file: "apply-time-wheel-copy-cleanup.mjs", label: "time wheel simplified copy and actions" },
   { file: "apply-unified-ai-task-instructions.mjs", label: "unified AI task instructions" },
