@@ -3,6 +3,9 @@ import { createRoot } from "react-dom/client";
 import "../app/globals.css";
 import "../app/room-backgrounds.css";
 import Home from "../app/page";
+import { installRoyalLibraryClipboardBridge } from "../app/royal-library-context";
+
+installRoyalLibraryClipboardBridge();
 
 const root = document.getElementById("root");
 
