@@ -3,7 +3,10 @@
 import { useEffect, type ComponentType } from "react";
 import CafeRoom from "./CafeRoom";
 import { JournalRoom } from "./JournalRoom";
-import { installRoyalLibraryClipboardBridge } from "./royal-library-context";
+import {
+  appendRoyalLibraryContext,
+  installRoyalLibraryClipboardBridge,
+} from "./royal-library-context";
 import { StudyRoom } from "./StudyRoom";
 import { TimeWheelRoom } from "./TimeWheelRoom";
 import TravelRabbitRoom from "./TravelRabbitRoom";
@@ -11,6 +14,10 @@ import { getRoom, type RoomId, type RoomRenderer } from "./room-registry";
 
 type RoomComponentProps = {
   onClose: () => void;
+};
+
+type BridgedClipboard = Clipboard & {
+  __crimsonRoyalLibraryFrameBridge?: boolean;
 };
 
 const roomRenderers: Partial<Record<RoomRenderer, ComponentType<RoomComponentProps>>> = {
@@ -26,9 +33,55 @@ type WorldRoomOutletProps = {
   onClose: () => void;
 };
 
+function installIframeRoyalLibraryBridge(frame: HTMLIFrameElement) {
+  try {
+    const clipboard = frame.contentWindow?.navigator.clipboard as BridgedClipboard | undefined;
+    if (!clipboard?.writeText || clipboard.__crimsonRoyalLibraryFrameBridge) return;
+
+    const originalWriteText = clipboard.writeText.bind(clipboard);
+    clipboard.writeText = (text: string) =>
+      originalWriteText(appendRoyalLibraryContext(text));
+    clipboard.__crimsonRoyalLibraryFrameBridge = true;
+  } catch {
+    // Cross-origin or sandboxed frames cannot be patched from the parent page.
+  }
+}
+
 export function WorldRoomOutlet({ active, onClose }: WorldRoomOutletProps) {
   useEffect(() => {
     installRoyalLibraryClipboardBridge();
+
+    const cleanups = new Map<HTMLIFrameElement, () => void>();
+    const attachFrame = (frame: HTMLIFrameElement) => {
+      if (cleanups.has(frame)) return;
+
+      const handleLoad = () => installIframeRoyalLibraryBridge(frame);
+      frame.addEventListener("load", handleLoad);
+      cleanups.set(frame, () => frame.removeEventListener("load", handleLoad));
+      installIframeRoyalLibraryBridge(frame);
+    };
+
+    const scanFrames = (root: ParentNode) => {
+      root.querySelectorAll<HTMLIFrameElement>("iframe").forEach(attachFrame);
+    };
+
+    scanFrames(document);
+    const observer = new MutationObserver((records) => {
+      records.forEach((record) => {
+        record.addedNodes.forEach((node) => {
+          if (!(node instanceof Element)) return;
+          if (node instanceof HTMLIFrameElement) attachFrame(node);
+          scanFrames(node);
+        });
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      cleanups.forEach((cleanup) => cleanup());
+      cleanups.clear();
+    };
   }, []);
 
   const room = getRoom(active);
