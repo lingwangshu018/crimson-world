@@ -60,6 +60,7 @@ const patches = [
   { file: "apply-strict-room-isolation.mjs", label: "strict room isolation" },
   { file: "apply-tavern-delete-actions.mjs", label: "separate tavern note and record deletion" },
   { file: "apply-mcp-direct-records-call.mjs", label: "direct MCP records routing" },
+  { file: "apply-library-studio-entry.mjs", label: "Royal Library studio entry" },
 ];
 
 console.log("\nCrimson World UI patch pipeline\n");
