@@ -9,13 +9,27 @@ if (source.includes(marker)) {
   process.exit(0);
 }
 
-const target = `<div>\n            <a href="https://github.com/lingwangshu018/crimson-world/tree/main/docs/world" target="_blank" rel="noreferrer">馆藏源文件</a>`;
-const replacement = `<div>\n            {/* ${marker} */}\n            <a href="./library-studio.html">进入编纂室</a>\n            <a href="https://github.com/lingwangshu018/crimson-world/tree/main/docs/world" target="_blank" rel="noreferrer">馆藏源文件</a>`;
+const topbarPattern = /(<header className="library-topbar">[\s\S]*?<div>)([\s\S]*?)(<\/div>[\s\S]*?<\/header>)/;
 
-if (!source.includes(target)) {
-  throw new Error("Royal Library topbar target not found.");
+if (topbarPattern.test(source)) {
+  source = source.replace(
+    topbarPattern,
+    `$1\n            {/* ${marker} */}\n            <a href="./library-studio.html">进入编纂室</a>$2$3`,
+  );
+  fs.writeFileSync(path, source);
+  console.log("Linked Royal Library studio from the library topbar.");
+  process.exit(0);
 }
 
-source = source.replace(target, replacement);
-fs.writeFileSync(path, source);
-console.log("Linked Royal Library studio from the library topbar.");
+const returnLink = `<a className="return-link" href="./">← 返回绯界</a>`;
+if (source.includes(returnLink)) {
+  source = source.replace(
+    returnLink,
+    `<>\n          {/* ${marker} */}\n          <a className="return-link" href="./library-studio.html">✦ 进入编纂室</a>\n          ${returnLink}\n        </>`,
+  );
+  fs.writeFileSync(path, source);
+  console.log("Linked Royal Library studio from the library sidebar.");
+  process.exit(0);
+}
+
+console.warn("Royal Library entry target was not found; standalone studio page remains available.");
