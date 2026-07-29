@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { appendRoyalLibraryContext } from "./royal-library-context";
 import "./journal-room.css";
 
 type PaperStyle = "default" | "grid" | "blank" | "night" | "custom";
@@ -315,7 +316,7 @@ export function JournalRoom({ onClose }: { onClose: () => void }) {
         "只处理这一条。",
       ].join("\n");
 
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(appendRoyalLibraryContext(text));
       window.alert("✨ 日记已同步到绯界云端，任务单也复制好了。现在可以直接粘贴给 AI。");
     } catch (error) {
       const message = error instanceof Error ? error.message : "同步失败，请稍后重试。";
