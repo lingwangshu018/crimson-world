@@ -61,6 +61,7 @@ const patches = [
   { file: "apply-tavern-delete-actions.mjs", label: "separate tavern note and record deletion" },
   { file: "apply-mcp-direct-records-call.mjs", label: "direct MCP records routing" },
   { file: "apply-library-studio-entry.mjs", label: "Royal Library studio entry" },
+  { file: "apply-record-bound-library-context.mjs", label: "record-bound Royal Library context" },
 ];
 
 console.log("\nCrimson World UI patch pipeline\n");
