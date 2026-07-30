@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crimson-world.local/schemas/git-archive-manifest.schema.json",
+  "title": "Crimson World Git Archive Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schemaVersion", "createdAt", "updatedAt", "modules", "library"],
+  "properties": {
+    "schema": {
+      "const": "crimson-world-vault"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generator": {
+      "type": "string",
+      "default": "crimson-world"
+    },
+    "modules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["journal", "tavern", "cafe", "timeWheel", "travelRabbit"],
+      "properties": {
+        "journal": { "$ref": "#/$defs/moduleEntry" },
+        "tavern": { "$ref": "#/$defs/moduleEntry" },
+        "cafe": { "$ref": "#/$defs/moduleEntry" },
+        "timeWheel": { "$ref": "#/$defs/moduleEntry" },
+        "travelRabbit": { "$ref": "#/$defs/moduleEntry" }
+      }
+    },
+    "library": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["characters", "worldbooks"],
+      "properties": {
+        "characters": { "$ref": "#/$defs/moduleEntry" },
+        "worldbooks": { "$ref": "#/$defs/moduleEntry" }
+      }
+    },
+    "credentialsIncluded": {
+      "const": false
+    }
+  },
+  "$defs": {
+    "moduleEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "count"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "updatedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}
