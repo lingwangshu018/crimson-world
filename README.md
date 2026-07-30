@@ -89,14 +89,21 @@ app/
 - 当前版本不包含 GORE 维度
 - 请以自愿、知情和安全为前提
 
-## 来源与署名
+## 来源、许可与署名
 
-Based on [Ruota della Fortuna by Copper (29-Cu)](https://github.com/29-Cu/routa-della-fortuna).
+> **Based on [Ruota della Fortuna by Copper (29-Cu)](https://github.com/29-Cu/routa-della-fortuna).**
 
-本项目重新设计了酒馆式交互、网页界面、调酒历史、随杯手记与导入导出功能；标签分类体系和部分标签数据来自上述项目。
+“绯夜酒馆”的标签维度分类、部分标签数据以及随机组合机制参考并改编自上述项目；其中原项目的标签分类体系与命名工作亦署名 **Monday**。
+
+绯夜酒馆在此基础上重新设计并实现了酒馆式交互、网页界面、调酒历史、随杯手记、角色称呼、档案导入导出以及 OrangeChat / AI 读写流程。本项目为独立改编项目，与原作者不存在官方合作、隶属或背书关系。
+
+依据原项目许可证要求，上述署名应同时保留在本 README 以及绯夜酒馆的公开页面或界面中。涉及原项目代码、标签体系、分类结构或其他实质性内容的复用与改编，继续遵循原项目许可与署名条款；完整声明见本仓库的 [LICENSE](LICENSE)。
+
+### 原项目贡献署名
+
+- **Copper (29-Cu)** — 原项目概念、视觉设计、标签整理与前端实现
+- **Monday** — 原项目标签分类体系、分类设计与命名
 
 ## License
 
 见 [LICENSE](LICENSE)。
-
-# Cloudflare rebuild
