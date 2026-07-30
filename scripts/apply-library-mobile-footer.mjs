@@ -20,11 +20,7 @@ if (source.includes(sidebarBlock)) {
   source = source.replace(sidebarBlock, "");
 }
 
-const desktopTopbarAnchor = `          <div>
-            <a href="https://github.com/lingwangshu018/crimson-world/tree/main/docs/world" target="_blank" rel="noreferrer">馆藏源文件</a>
-            <a href="https://github.com/lingwangshu018/crimson-world" target="_blank" rel="noreferrer">编纂仓库</a>
-          </div>`;
-const desktopTopbar = `          <div>
+const desktopControls = `          <div>
             {/* CRIMSON_LIBRARY_STUDIO_ENTRY */}
             <a href="./library-studio.html">进入编纂室</a>
             <a href="./">返回绯界</a>
@@ -33,8 +29,9 @@ const desktopTopbar = `          <div>
           </div>`;
 
 if (!source.includes("CRIMSON_LIBRARY_STUDIO_ENTRY")) {
-  if (!source.includes(desktopTopbarAnchor)) throw new Error("Royal Library desktop topbar anchor not found.");
-  source = source.replace(desktopTopbarAnchor, desktopTopbar);
+  const topbarPattern = /(\s*<header className="library-topbar">\s*<p>[^]*?<\/p>)(?:\s*<div>[^]*?<\/div>)?/;
+  if (!topbarPattern.test(source)) throw new Error("Royal Library desktop topbar not found.");
+  source = source.replace(topbarPattern, `$1\n${desktopControls}`);
 }
 
 const footerAnchor = `        <footer>© 2026 Crimson World · 初代世界编纂者：小宝 · 共同编纂者：律</footer>`;
