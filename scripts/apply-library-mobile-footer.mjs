@@ -20,6 +20,23 @@ if (source.includes(sidebarBlock)) {
   source = source.replace(sidebarBlock, "");
 }
 
+const desktopTopbarAnchor = `          <div>
+            <a href="https://github.com/lingwangshu018/crimson-world/tree/main/docs/world" target="_blank" rel="noreferrer">馆藏源文件</a>
+            <a href="https://github.com/lingwangshu018/crimson-world" target="_blank" rel="noreferrer">编纂仓库</a>
+          </div>`;
+const desktopTopbar = `          <div>
+            {/* CRIMSON_LIBRARY_STUDIO_ENTRY */}
+            <a href="./library-studio.html">进入编纂室</a>
+            <a href="./">返回绯界</a>
+            <a href="https://github.com/lingwangshu018/crimson-world/tree/main/docs/world" target="_blank" rel="noreferrer">馆藏源文件</a>
+            <a href="https://github.com/lingwangshu018/crimson-world" target="_blank" rel="noreferrer">编纂仓库</a>
+          </div>`;
+
+if (!source.includes("CRIMSON_LIBRARY_STUDIO_ENTRY")) {
+  if (!source.includes(desktopTopbarAnchor)) throw new Error("Royal Library desktop topbar anchor not found.");
+  source = source.replace(desktopTopbarAnchor, desktopTopbar);
+}
+
 const footerAnchor = `        <footer>© 2026 Crimson World · 初代世界编纂者：小宝 · 共同编纂者：律</footer>`;
 const mobileFooter = `        <section className="library-mobile-footer">
           <div className="keeper-card">
@@ -28,6 +45,7 @@ const mobileFooter = `        <section className="library-mobile-footer">
             <p>馆藏整理度：{Math.round((books.filter((book) => book.status === "馆藏").length / books.length) * 100)}%</p>
             <button onClick={() => setRabbitLine("我在呢！有什么书想找，都可以告诉兔兔馆长。")}>与兔兔说话</button>
           </div>
+          <a className="return-link" href="./library-studio.html">✦ 进入编纂室</a>
           <a className="return-link" href="./">← 返回绯界</a>
         </section>
 
@@ -45,4 +63,4 @@ if (!styles.includes(marker)) {
 
 fs.writeFileSync(componentPath, source);
 fs.writeFileSync(stylePath, styles);
-console.log("Moved the mobile librarian controls to the page footer.");
+console.log("Kept Royal Library controls available on desktop and mobile.");
