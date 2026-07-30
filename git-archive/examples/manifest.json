@@ -1,0 +1,47 @@
+{
+  "schema": "crimson-world-vault",
+  "schemaVersion": 1,
+  "createdAt": "2026-07-30T10:00:00.000Z",
+  "updatedAt": "2026-07-30T10:00:00.000Z",
+  "generator": "crimson-world",
+  "modules": {
+    "journal": {
+      "path": "records/journal.json",
+      "count": 0,
+      "updatedAt": null
+    },
+    "tavern": {
+      "path": "records/tavern.json",
+      "count": 0,
+      "updatedAt": null
+    },
+    "cafe": {
+      "path": "records/cafe.json",
+      "count": 0,
+      "updatedAt": null
+    },
+    "timeWheel": {
+      "path": "records/time-wheel.json",
+      "count": 0,
+      "updatedAt": null
+    },
+    "travelRabbit": {
+      "path": "records/travel-rabbit.json",
+      "count": 0,
+      "updatedAt": null
+    }
+  },
+  "library": {
+    "characters": {
+      "path": "library/characters.json",
+      "count": 0,
+      "updatedAt": null
+    },
+    "worldbooks": {
+      "path": "library/worldbooks.json",
+      "count": 0,
+      "updatedAt": null
+    }
+  },
+  "credentialsIncluded": false
+}

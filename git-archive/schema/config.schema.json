@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crimson-world.local/schemas/git-archive-config.schema.json",
+  "title": "Crimson World Git Archive Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "schemaVersion", "mode", "provider", "branch", "directory", "tokenStorage"],
+  "properties": {
+    "schema": {
+      "const": "crimson-world-git-archive-config"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "mode": {
+      "enum": ["automatic", "manual", "local"]
+    },
+    "provider": {
+      "enum": ["github", "gitee", "gitlab", "custom", "none"]
+    },
+    "owner": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "repository": {
+      "type": "string",
+      "maxLength": 160
+    },
+    "branch": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "default": "main"
+    },
+    "directory": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "default": "crimson-vault",
+      "pattern": "^(?!/)(?!.*\\.\\.)[^\\\\:*?\"<>|]+$"
+    },
+    "apiBaseUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "tokenStorage": {
+      "const": "browser-local-only"
+    },
+    "includeLibrary": {
+      "type": "boolean",
+      "default": true
+    },
+    "includeBackups": {
+      "type": "boolean",
+      "default": true
+    },
+    "conflictPolicy": {
+      "enum": ["preview", "prefer-newer", "keep-local"],
+      "default": "preview"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "mode": { "const": "automatic" } }
+      },
+      "then": {
+        "required": ["owner", "repository"],
+        "properties": {
+          "provider": {
+            "enum": ["github", "gitee", "gitlab", "custom"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "provider": { "const": "custom" } }
+      },
+      "then": {
+        "required": ["apiBaseUrl"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "mode": { "const": "local" } }
+      },
+      "then": {
+        "properties": {
+          "provider": { "const": "none" }
+        }
+      }
+    }
+  ]
+}
