@@ -63,6 +63,7 @@ const patches = [
   { file: "apply-library-studio-entry.mjs", label: "Royal Library studio entry" },
   { file: "apply-record-bound-library-context.mjs", label: "record-bound Royal Library context" },
   { file: "apply-disable-library-clipboard-injection.mjs", label: "disable Royal Library clipboard injection" },
+  { file: "apply-record-bound-context-all-rooms.mjs", label: "record-bound context for Tavern, Cafe, Time Wheel, and Travel Rabbit" },
 ];
 
 console.log("\nCrimson World UI patch pipeline\n");
