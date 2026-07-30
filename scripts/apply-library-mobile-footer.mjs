@@ -60,4 +60,4 @@ if (!styles.includes(marker)) {
 
 fs.writeFileSync(componentPath, source);
 fs.writeFileSync(stylePath, styles);
-console.log("Kept Royal Library controls available on desktop and mobile.");
+console.log("Royal Library controls are available on desktop and mobile.");
