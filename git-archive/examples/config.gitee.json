@@ -1,0 +1,14 @@
+{
+  "schema": "crimson-world-git-archive-config",
+  "schemaVersion": 1,
+  "mode": "automatic",
+  "provider": "gitee",
+  "owner": "your-name",
+  "repository": "my-crimson-vault",
+  "branch": "main",
+  "directory": "crimson-vault",
+  "tokenStorage": "browser-local-only",
+  "includeLibrary": true,
+  "includeBackups": true,
+  "conflictPolicy": "preview"
+}
