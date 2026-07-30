@@ -62,6 +62,7 @@ const patches = [
   { file: "apply-mcp-direct-records-call.mjs", label: "direct MCP records routing" },
   { file: "apply-library-studio-entry.mjs", label: "Royal Library studio entry" },
   { file: "apply-record-bound-library-context.mjs", label: "record-bound Royal Library context" },
+  { file: "apply-disable-library-clipboard-injection.mjs", label: "disable Royal Library clipboard injection" },
 ];
 
 console.log("\nCrimson World UI patch pipeline\n");
