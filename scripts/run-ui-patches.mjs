@@ -65,6 +65,7 @@ const patches = [
   { file: "apply-disable-library-clipboard-injection.mjs", label: "disable Royal Library clipboard injection" },
   { file: "apply-record-bound-context-all-rooms.mjs", label: "record-bound context for Tavern, Cafe, Time Wheel, and Travel Rabbit" },
   { file: "apply-tavern-note-role-signature.mjs", label: "Tavern role-based note signature and participant names" },
+  { file: "../git-archive/apply-git-archive-center.mjs", label: "separate Git archive connection and import/export center" },
 ];
 
 console.log("\nCrimson World UI patch pipeline\n");
