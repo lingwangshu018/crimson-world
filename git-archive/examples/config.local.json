@@ -1,0 +1,12 @@
+{
+  "schema": "crimson-world-git-archive-config",
+  "schemaVersion": 1,
+  "mode": "local",
+  "provider": "none",
+  "branch": "main",
+  "directory": "crimson-vault",
+  "tokenStorage": "browser-local-only",
+  "includeLibrary": true,
+  "includeBackups": true,
+  "conflictPolicy": "preview"
+}
