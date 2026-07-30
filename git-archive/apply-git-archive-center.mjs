@@ -27,6 +27,7 @@ if (!cloud.includes(marker)) {
       setGitRepository(String(savedGit.repository || ""));
       setGitBranch(String(savedGit.branch || "main"));
       setGitDirectory(String(savedGit.directory || "crimson-world-vault"));
+      setGitToken(read("crimson.git-archive.token.v1"));
     } catch {}`);
 
   const functionAnchor = '  async function copyKey() {';
@@ -42,12 +43,13 @@ if (!cloud.includes(marker)) {
       updatedAt: new Date().toISOString(),
     };
     write("crimson.git-archive.config.v1", JSON.stringify(config));
+    if (gitToken) write("crimson.git-archive.token.v1", gitToken);
     setMessage("Git 仓库存档配置已保存在当前浏览器。访问令牌不会写入导出文件。");
   }
 
   function collectGitArchive() {
     const excluded = new Set([OWNER_KEY, READ_KEY, NOTE_KEY, "crimson.git-archive.token.v1"]);
-    const storage = {};
+    const storage: Record<string, string | null> = {};
     for (let index = 0; index < window.localStorage.length; index += 1) {
       const key = window.localStorage.key(index);
       if (!key || excluded.has(key)) continue;
@@ -85,9 +87,9 @@ if (!cloud.includes(marker)) {
     setMessage("Git 仓库存档已导出。可以把这个 JSON 上传到仓库，也可以稍后直接导回绯界。");
   }
 
-  async function importGitArchive(file) {
+  async function importGitArchive(file: File) {
     try {
-      const parsed = JSON.parse(await file.text());
+      const parsed = JSON.parse(await file.text()) as { manifest?: { schema?: string }; storage?: Record<string, unknown> };
       if (parsed?.manifest?.schema !== "crimson-world-vault" || !parsed.storage || typeof parsed.storage !== "object") {
         throw new Error("这不是可识别的绯界 Git 仓库存档。");
       }
@@ -131,7 +133,7 @@ ${functionAnchor}`;
                   </div>
                   <label>仓库地址或 owner/repository<input value={gitRepository} placeholder={gitProvider === "gitee" ? "例如：用户名/crimson-world-vault" : "例如：owner/crimson-world-vault"} onChange={(event) => setGitRepository(event.target.value)} /></label>
                   <div className="git-archive-row"><label>分支<input value={gitBranch} placeholder="main" onChange={(event) => setGitBranch(event.target.value)} /></label><label>存档目录<input value={gitDirectory} placeholder="crimson-world-vault" onChange={(event) => setGitDirectory(event.target.value)} /></label></div>
-                  <label>访问令牌（可选，仅用于后续自动同步）<input type="password" value={gitToken} autoComplete="off" placeholder="不会写入导出文件" onChange={(event) => setGitToken(event.target.value)} onBlur={() => { if (gitToken) write("crimson.git-archive.token.v1", gitToken); }} /></label>
+                  <label>访问令牌（可选，仅用于后续自动同步）<input type="password" value={gitToken} autoComplete="off" placeholder="不会写入导出文件" onChange={(event) => setGitToken(event.target.value)} /></label>
                   <button className="git-save-config" type="button" onClick={saveGitArchiveConfig}>保存 Git 配置</button>
                   <div className="git-archive-actions">
                     <button type="button" onClick={exportGitArchive}><span>↓</span><strong>导出 Git 存档</strong><small>生成可上传仓库的 JSON</small></button>
